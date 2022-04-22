@@ -1,0 +1,22 @@
+Metadata-Version: 2.1
+Name: popug-sdk
+Version: 0.0.1
+Summary: Package for uber popug training project
+Home-page: https://github.com/Drozdetskiy/popug_jira
+Author: Mikhail Drozdetskiy
+Author-email: m.drozdetskiy@gmail.com
+License: UNKNOWN
+Platform: UNKNOWN
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# Popug SDK
+## Introduction
+Popug SDK is a set of tools for developing training services for PopugJira project.
+
+## How to start
+```
+pip install popug_sdk
+```
+
+
