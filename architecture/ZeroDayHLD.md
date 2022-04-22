@@ -4,9 +4,9 @@
 Система - PopugJira
 Система отвечает за инновационный подход созданию и ассайну рабочих тасок для попугов.
 ## Service Diagram
-![Service Diagram](https://github.com/Drozdetskiy/popug_jira/blob/develop/architecture/services_diagram.png)
+![Service Diagram](https://github.com/Drozdetskiy/popug_jira/blob/master/architecture/services_diagram.png)
 ## Events Diagram 
-![Service Diagram](https://github.com/Drozdetskiy/popug_jira/blob/develop/architecture/eventsourcing_diagram.png)
+![Service Diagram](https://github.com/Drozdetskiy/popug_jira/blob/master/architecture/eventsourcing_diagram.png)
 
 ## Описание сервисов
 ### PopugJiraWebClient
@@ -179,7 +179,7 @@ table TopManagerSalaryMaterializedView:
 FastApi, Postgres, Redis, RabbitMQ/Kafka
 
 ## Минусы и трудности
-- Дублирование данных о юзере - мне видется это самым больгим минусом системы
+- Дублирование данных о юзере - мне видется это самым большим минусом системы
 - Возможно будет тяжело изменять систему при изменении бизнес задачи
 - Трудность при разрешении конфликтов и рейскондишена ивентов.
 

@@ -124,7 +124,6 @@ def draw_services_diagram(**kwargs):
 
             internal_services_map[InternalServices.ACCOUNTING] = accounting
 
-
         gateway >> Edge(label="http") >> list(internal_services_map.values())
 
 
