@@ -1,15 +1,14 @@
+from __future__ import annotations
+
 import importlib
 import os
+from functools import lru_cache
 from typing import (
     TYPE_CHECKING,
     Type,
 )
 
-from pydantic.tools import lru_cache
-
-__all__ = (
-    "settings",
-)
+__all__ = ("settings",)
 
 if TYPE_CHECKING:
     from popug_sdk.conf.global_settings import Settings as BaseSettings
@@ -20,7 +19,7 @@ class Settings:
 
     @classmethod
     @lru_cache
-    def load(cls):
+    def load(cls) -> BaseSettings:
         settings_module = os.environ.get(
             cls.ENVIRONMENT_VARIABLE, "popug_sdk.conf.global_settings"
         )

@@ -7,10 +7,11 @@ from os.path import (
 import typer
 from alembic.command import revision
 from alembic.config import Config
+
 from popug_sdk.conf import settings
 
 
-def _get_revision_id(directory):
+def _get_revision_id(directory: str) -> str:
     versions_dir = join(directory, "versions")
     max_revision = 0
     for file in listdir(versions_dir):
@@ -21,12 +22,12 @@ def _get_revision_id(directory):
     return str(max_revision).rjust(4, "0")
 
 
-def _get_next_revision_id(directory):
+def _get_next_revision_id(directory: str) -> str:
     revision_id = _get_revision_id(directory)
     return str(int(revision_id) + 1).rjust(4, "0")
 
 
-def makemigrations(message: str = typer.Option("auto")):
+def makemigrations(message: str = typer.Option("auto")) -> None:
     revision(
         Config(settings.alembic.config),
         message=message,

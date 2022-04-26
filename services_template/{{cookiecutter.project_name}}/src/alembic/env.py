@@ -1,19 +1,15 @@
-import asyncio
 import os
 
-from sqlalchemy.engine import Engine
-from sqlalchemy.ext.asyncio import AsyncEngine
-
-os.environ.setdefault('SETTINGS_MODULE', 'src.conf')  # noqa
+os.environ.setdefault("SETTINGS_MODULE", "src.conf")  # noqa
 
 from logging.config import fileConfig
 
 from alembic import context
-from src.models import *  # noqa
 from sqlalchemy import (
     engine_from_config,
     pool,
 )
+from src.models import *  # noqa
 
 from popug_sdk.conf import settings
 
@@ -83,12 +79,12 @@ def run_migrations_online():
     url = settings.database_dsn
 
     connectable = engine_from_config(
-            configuration=dict(),
-            url=url,
-            prefix="sqlalchemy.",
-            poolclass=pool.NullPool,
-            future=True,
-        )
+        configuration=dict(),
+        url=url,
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+        future=True,
+    )
 
     with connectable.connect() as connection:
         do_run_migrations(connection)

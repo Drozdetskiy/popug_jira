@@ -5,9 +5,7 @@ from sqlalchemy.ext.declarative import (
     declared_attr,
 )
 
-__all__ = (
-    "BaseModel",
-)
+__all__ = ("BaseModel",)
 
 
 @as_declarative()
@@ -19,5 +17,5 @@ class BaseModel:
     def __tablename__(cls) -> str:
         return cls.__name__.lower()
 
-    def __init__(self, *args, **kwargs):  # pragma: no cover
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
