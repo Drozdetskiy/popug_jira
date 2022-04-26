@@ -1,10 +1,11 @@
+import enum
 from functools import partial
 
 from diagrams import (
-    Diagram,
     Cluster,
-    Node,
+    Diagram,
     Edge,
+    Node,
 )
 from diagrams.aws.compute import EC2
 from diagrams.aws.database import (
@@ -13,11 +14,7 @@ from diagrams.aws.database import (
 )
 from diagrams.aws.general import Client
 from diagrams.aws.integration import Eventbridge
-from diagrams.aws.network import (
-    APIGateway,
-)
-import enum
-
+from diagrams.aws.network import APIGateway
 from diagrams.k8s.compute import Cronjob
 
 
@@ -46,9 +43,9 @@ class EventBus(enum.Enum):
 
 
 def create_service(
-        service: InternalServices | ExternalServices,
-        storage: bool = False,
-        cache: bool = False
+    service: InternalServices | ExternalServices,
+    storage: bool = False,
+    cache: bool = False,
 ) -> Node:
     node = SERVICE_TYPE_MAP.get(service, EC2)(service.value)
 
@@ -68,12 +65,14 @@ def create_event_bus(event_bus: EventBus) -> Node:
 
 
 def create_external_services(
-        exclude: tuple[ExternalServices] = ()
+    exclude: tuple[ExternalServices] = (),
 ) -> dict[ExternalServices, Node]:
     return {
         service_type: create_service(
             service_type,
-        ) for service_type in ExternalServices if service_type not in exclude
+        )
+        for service_type in ExternalServices
+        if service_type not in exclude
     }
 
 
@@ -82,38 +81,42 @@ def create_event_buses() -> dict[EventBus, Node]:
 
 
 def create_internal_services(
-        exclude: tuple[InternalServices] = (),
-        **kwargs
+    exclude: tuple[InternalServices] = (), **kwargs
 ) -> dict[InternalServices, Node]:
     creator = partial(create_service, **kwargs)
     return {
         service: creator(
             service=service,
-        ) for service in InternalServices if service not in exclude
+        )
+        for service in InternalServices
+        if service not in exclude
     }
 
 
 def draw_services_diagram(**kwargs):
     with Diagram("Services Diagram", **kwargs):
         external_services_map = create_external_services(
-            exclude=(ExternalServices.GATEWAY, )
+            exclude=(ExternalServices.GATEWAY,)
         )
 
-        external_services_map[ExternalServices.AUTH]\
-            << Edge(label="https")\
+        (
+            external_services_map[ExternalServices.AUTH]
+            << Edge(label="https")
             << external_services_map[ExternalServices.WEB_CLIENT]
+        )
 
         with Cluster("Gateway"):
             gateway = create_service(ExternalServices.GATEWAY, cache=True)
 
-        external_services_map[ExternalServices.WEB_CLIENT]\
-            >> Edge(label="https")\
+        (
+            external_services_map[ExternalServices.WEB_CLIENT]
+            >> Edge(label="https")
             >> gateway
+        )
 
         with Cluster("Services Under Gateway"):
             internal_services_map = create_internal_services(
-                exclude=(InternalServices.ACCOUNTING, ),
-                storage=True
+                exclude=(InternalServices.ACCOUNTING,), storage=True
             )
             with Cluster("Accounting"):
                 accounting = create_service(
@@ -138,11 +141,14 @@ def draw_eventsourcing_diagram(**kwargs):
         task_bus = create_event_bus(EventBus.TASK_EVENTS)
         internal_services_map[InternalServices.TASK_KEEPER] >> task_bus
         task_reassign_bus = create_event_bus(EventBus.REASSIGN_TASK_EVENTS)
-        internal_services_map[InternalServices.TASK_KEEPER] >> task_reassign_bus  # noqa
+        (
+            internal_services_map[InternalServices.TASK_KEEPER]
+            >> task_reassign_bus
+        )  # noqa
         task_reassign_bus >> internal_services_map[InternalServices.ACCOUNTING]
         task_bus >> internal_services_map[InternalServices.ACCOUNTING]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     draw_services_diagram(show=False, direction="TB")
     draw_eventsourcing_diagram(show=False)

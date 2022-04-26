@@ -1,11 +1,12 @@
 from contextlib import contextmanager
+from typing import Any
 
+from sqlalchemy import create_engine as _engine_create
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import (
-    sessionmaker,
     Session,
+    sessionmaker,
 )
-from sqlalchemy import create_engine as _engine_create
 
 from popug_sdk.conf import settings
 from popug_sdk.db.base_class import BaseModel
@@ -31,7 +32,7 @@ def create_engine() -> Engine:
     return _engine
 
 
-def init_db():
+def init_db() -> sessionmaker:
     global _Session
     create_engine()
 
@@ -40,16 +41,18 @@ def init_db():
             autocommit=False,
             autoflush=False,
             bind=_engine,
-            expire_on_commit=False
+            expire_on_commit=False,
         )
+
+        return _Session
 
 
 @contextmanager
-def create_session(session=None, **kwargs) -> Session:
-    init_db()
-
+def create_session(session: Session | None = None, **kwargs: Any) -> Session:
     if not session:
-        with _Session(**kwargs) as session:
+        _session = init_db()
+
+        with _session(**kwargs) as session:
             yield session
     else:
         yield session
