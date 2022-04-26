@@ -1,1 +1,1 @@
-include requirements.txt VERSION
+include requirements.txt requirements.db.txt requirements.amqp.txt requirements.redis.txt VERSION

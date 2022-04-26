@@ -1,36 +1,30 @@
 import logging.config
-from typing import Union
+from typing import Any
 
 from pydantic import (
+    BaseModel,
     BaseSettings,
     Field,
-    BaseModel,
 )
 
-__all__ = (
-    "Settings",
+__all__ = ("Settings",)
+
+from popug_sdk.conf.amqp import AMQPSettings
+from popug_sdk.conf.constants import (
+    BASE_NAME,
+    LOCALHOST,
+    LOG_LEVEL,
+    PortType,
 )
-
-PortType = Union[str, int]
-
-
-BASE_NAME = "service"
-LOG_LEVEL = "INFO"
-
-
-class DatabaseSettings(BaseModel):
-    host: str = "localhost"
-    port: PortType = 5432
-    user: str = "postgres"
-    password: str = "postgres"
-    database_name: str = f"{BASE_NAME}_db"
+from popug_sdk.conf.db import DatabaseSettings
+from popug_sdk.conf.redis import RedisSettings
 
 
 class AppSettings(BaseModel):
     debug: bool = False
     instance: str = "src.main:app"
     app_schema: str = "http"
-    app_host: str = "0.0.0.0"
+    app_host: str = LOCALHOST
     app_port: PortType = "8080"
 
 
@@ -45,19 +39,23 @@ class Settings(BaseSettings):
     debug: bool = False
     use_https: bool = True
     log_level: str = LOG_LEVEL
-    tag_groups: list[dict] = Field(default_factory=list)
-    commands_roots: list[str] = Field(default_factory=list)
+    tag_groups: list[dict[str, Any]] = Field(default_factory=list)
+    commands_roots: list[str] = Field(default_factory=lambda: ["src"])
 
     app: AppSettings = Field(default_factory=AppSettings)
     alembic: AlembicSettings = Field(default_factory=AlembicSettings)
     database: DatabaseSettings = Field(default_factory=DatabaseSettings)
+    amqp: dict[str, AMQPSettings] = Field(default_factory=dict)
+    redis: dict[str, RedisSettings] = Field(default_factory=dict)
 
     @property
     def database_dsn(self) -> str:
-        database_dsn_template = "postgresql://" \
-                                "{database_user}:{database_password}@" \
-                                "{database_host}:{database_port}/" \
-                                "{database_name}"
+        database_dsn_template = (
+            "postgresql://"
+            "{database_user}:{database_password}@"
+            "{database_host}:{database_port}/"
+            "{database_name}"
+        )
 
         return database_dsn_template.format(
             database_user=self.database.user,
@@ -68,47 +66,45 @@ class Settings(BaseSettings):
         )
 
     @property
-    def logging(self) -> dict:
+    def logging(self) -> dict[str, Any]:
         return {
             "version": 1,
             "disable_existing_loggers": False,
             "formatters": {
                 "consoleFormatter": {
                     "()": "uvicorn.logging.DefaultFormatter",
-                    "fmt": "[%(process)d] [%(asctime)s] [%(levelname)s] %(name)s -> %(message)s"  # noqa
+                    "fmt": "[%(process)d] [%(asctime)s] [%(levelname)s] %(name)s -> %(message)s",  # noqa
                 },
                 "access": {
                     "()": "uvicorn.logging.AccessFormatter",
-                    "fmt": "[%(asctime)s] [%(levelname)s] %(name)s -> '%(request_line)s' %(status_code)s"  # noqa
-                }
+                    "fmt": "[%(asctime)s] [%(levelname)s] %(name)s -> '%(request_line)s' %(status_code)s",  # noqa
+                },
             },
             "handlers": {
                 "console": {
                     "level": "DEBUG",
                     "class": "logging.StreamHandler",
                     "stream": "ext://sys.stdout",
-                    "formatter": "consoleFormatter"
+                    "formatter": "consoleFormatter",
                 },
                 "access": {
                     "formatter": "access",
                     "class": "logging.StreamHandler",
-                    "stream": "ext://sys.stdout"
-                }
+                    "stream": "ext://sys.stdout",
+                },
             },
             "loggers": {
                 self.project: {
                     "handlers": ["console"],
-                    "level": self.log_level
+                    "level": self.log_level,
                 },
-                "uvicorn.error": {
-                    "level": "INFO"
-                },
+                "uvicorn.error": {"level": "INFO"},
                 "uvicorn": {
                     "handlers": ["access"],
                     "level": "INFO",
-                    "propagate": False
-                }
-            }
+                    "propagate": False,
+                },
+            },
         }
 
     class Config:
@@ -116,5 +112,5 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_nested_delimiter = "__"
 
-    def set_up_logging(self):
+    def set_up_logging(self) -> None:
         logging.config.dictConfig(self.logging)

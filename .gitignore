@@ -1,1 +1,6 @@
 .idea/
+build/
+*.egg-info/
+dist/
+pgp/
+.mypy_cache/
