@@ -4,9 +4,9 @@
 Система - PopugJira
 Система отвечает за инновационный подход созданию и ассайну рабочих тасок для попугов.
 ## Service Diagram
-![Service Diagram](https://github.com/Drozdetskiy/popug_jira/blob/master/architecture/services_diagram.png)
+![Service Diagram](https://github.com/Drozdetskiy/popug_jira/blob/main/architecture/services_diagram.png)
 ## Events Diagram 
-![Service Diagram](https://github.com/Drozdetskiy/popug_jira/blob/master/architecture/eventsourcing_diagram.png)
+![Service Diagram](https://github.com/Drozdetskiy/popug_jira/blob/main/architecture/eventsourcing_diagram.png)
 
 ## Описание сервисов
 ### PopugJiraWebClient
