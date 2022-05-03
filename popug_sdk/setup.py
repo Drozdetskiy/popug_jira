@@ -46,6 +46,7 @@ def get_extras_require():
 setup(
     name="popug_sdk",
     version=get_version(),
+    package_data={"popug_sdk": ["py.typed"]},
     description="Package for uber popug training project",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
