@@ -9,13 +9,13 @@ from sqlalchemy.orm import (
 )
 
 from popug_sdk.conf import settings
-from popug_sdk.db.base_class import BaseModel
+from popug_sdk.db.registry import mapper_registry
 
 __all__ = (
-    "create_session",
-    "BaseModel",
-    "init_db",
     "create_engine",
+    "create_session",
+    "init_db",
+    "mapper_registry",
 )
 
 

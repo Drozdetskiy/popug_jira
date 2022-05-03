@@ -4,3 +4,5 @@ build/
 dist/
 pgp/
 .mypy_cache/
+.tox/
+__pycache__/
