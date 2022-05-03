@@ -34,9 +34,10 @@ class AMQPSettings(BaseModel):
     username: str = "guest"
     password: str = "guest"
     virtual_host: str = "/"
+    heartbeat: int = 0
     exchange: ExchangeSettings = Field(default_factory=ExchangeSettings)
     queue: QueueSettings = Field(default_factory=QueueSettings)
-    routing_keys: list[str] = Field(default_factory=list)
+    routing_keys: list[str] = Field(default_factory=lambda: ["#"])
 
     @property
     def url(self) -> str:

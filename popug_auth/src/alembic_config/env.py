@@ -1,4 +1,5 @@
 import os
+import sys
 
 os.environ.setdefault("SETTINGS_MODULE", "src.conf")  # noqa
 
@@ -9,9 +10,12 @@ from sqlalchemy import (
     engine_from_config,
     pool,
 )
-from src.models import *  # noqa
+
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))  # noqa
+from models import *  # noqa
 
 from popug_sdk.conf import settings
+from popug_sdk.db import mapper_registry
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -23,10 +27,9 @@ fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from popug_sdk.db import BaseModel  # noqa
 
 # target_metadata = mymodel.Base.metadata
-target_metadata = BaseModel.metadata
+target_metadata = mapper_registry.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

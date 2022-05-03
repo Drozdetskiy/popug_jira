@@ -1,1 +1,1 @@
-popug_sdk~=0.0.1
+popug_sdk[all]~=0.0.6

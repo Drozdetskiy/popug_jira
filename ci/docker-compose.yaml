@@ -1,0 +1,131 @@
+version: "2.1"
+x-auth-base: &auth-base
+  image: drozdetskiy/popug-auth-base:latest
+  volumes:
+    - ../popug_auth/:/home/httpd/app/src
+  env_file:
+    - .env
+  working_dir: /home/httpd/app/src
+
+x-taskkeeper-base: &taskkeeper-base
+  image: drozdetskiy/popug-taskkeeper-base:latest
+  volumes:
+    - ../popug_taskkeeper/:/home/httpd/app/src
+  env_file:
+    - .env
+  working_dir: /home/httpd/app/src
+
+services:
+  # ------- POPUG AUTH SERVICE -------
+  popug_auth_main:
+    <<: *auth-base
+    command: python manage.py runserver
+    ports:
+      - "8080:8080"
+    depends_on:
+      - popug_auth_maintenance
+
+  popug_auth_redis:
+    image: redis:6.2.7-alpine
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+
+  popug_auth_db:
+    image: postgres:14.2-alpine
+    volumes:
+      - popug-auth-db-data:/var/lib/postgresql/data/pgdata
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=popug_auth_db
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+
+  popug_auth_maintenance:
+    <<: *auth-base
+    command: sh -c "python manage.py migrate && python manage.py generate-test-user && tail -f /dev/null"
+    depends_on:
+      popug_auth_db:
+        condition: service_healthy
+      popug_auth_redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # ------- POPUG TASKKEEPER SERVICE -------
+  popug_taskkeeper_main:
+    <<: *taskkeeper-base
+    command: python manage.py runserver
+    ports:
+      - "8081:8080"
+    depends_on:
+      - popug_taskkeeper_maintenance
+
+  popug_taskkeeper_redis:
+    image: redis:6.2.7-alpine
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+
+  popug_taskkeeper_db:
+    image: postgres:14.2-alpine
+    volumes:
+      - popug-taskkeeper-db-data:/var/lib/postgresql/data/pgdata
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=popug_taskkeeper_db
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+
+  popug_taskkeeper_maintenance:
+    <<: *taskkeeper-base
+    command: sh -c "python manage.py migrate && python manage.py generate-test-data && tail -f /dev/null"
+    depends_on:
+      popug_taskkeeper_db:
+        condition: service_healthy
+      popug_taskkeeper_redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  popug_taskkeeper_user_business_call_consumer_worker:
+    <<: *taskkeeper-base
+    command: python manage.py user-business-call-events-consumer
+    depends_on:
+      - popug_taskkeeper_maintenance
+
+  popug_taskkeeper_user_data_streaming_consumer_worker:
+    <<: *taskkeeper-base
+    command: python manage.py user-business-call-events-consumer
+    depends_on:
+      - popug_taskkeeper_maintenance
+
+  # ------- POPUG SHARED SERVICES -------
+  rabbitmq:
+    image: rabbitmq:3.9.15-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      timeout: 20s
+      interval: 5s
+      retries: 5
+
+volumes:
+  popug-auth-db-data:
+  popug-taskkeeper-db-data:

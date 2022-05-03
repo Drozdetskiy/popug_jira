@@ -1,0 +1,103 @@
+### Get auth code
+# @no-redirect
+GET http://{{auth_host}}/v1/oauth/authorize?beak_shape={{beak_shape}}&response_type=code&redirect_uri={{redirect_uri}}
+Accept: application/json
+
+> {%
+    var code = response.headers.valueOf("location").split("code=")[1];
+    client.global.set("code", code);
+%}
+
+### Get access token
+POST http://{{auth_host}}/v1/oauth/token?grant_type=authorization_code&code={{code}}
+Accept: application/json
+
+> {%
+    client.global.set("access_token", response.body.result.access_token);
+    client.global.set("refresh_token", response.body.result.refresh_token);
+%}
+
+### Create task
+POST http://{{host}}/v1/tasks
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "title": "{{$uuid}}",
+  "description": "{{$uuid}}"
+}
+
+> {%
+    var test_response_status = 201;
+    client.test("Task created successfully", function() {
+        client.assert(response.status === test_response_status, "Response status is not " + test_response_status);
+    });
+    client.global.set("created_task_id", response.body.result.id);
+%}
+
+### Create more tasks
+POST http://{{host}}/v1/tasks
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "title": "{{$uuid}}",
+  "description": "{{$uuid}}"
+}
+
+### Create more tasks
+POST http://{{host}}/v1/tasks
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "title": "{{$uuid}}",
+  "description": "{{$uuid}}"
+}
+
+### Get tasks list
+GET http://{{host}}/v1/tasks
+Authorization: Bearer {{access_token}}
+
+> {%
+    var test_response_status = 200;
+    client.test("Tasks list get successfully", function() {
+        client.assert(response.status === test_response_status, "Response status is not " + test_response_status);
+    });
+    client.global.set("task_id", response.body.result[0].id);
+%}
+
+### Get task
+GET http://{{host}}/v1/tasks/{{task_id}}
+Authorization: Bearer {{access_token}}
+
+> {%
+    var test_response_status = 200;
+    client.test("Task get successfully", function() {
+        client.assert(response.status === test_response_status, "Response status is not " + test_response_status);
+    });
+%}
+
+### Complete task
+POST http://{{host}}/v1/tasks/{{created_task_id}}/complete
+Authorization: Bearer {{access_token}}
+
+> {%
+    var test_response_status = 200;
+    client.test("Task completed successfully", function() {
+        client.assert(response.status === test_response_status, "Response status is not " + test_response_status);
+    });
+%}
+
+### Reshuffle tasks
+POST http://{{host}}/v1/tasks/reshuffle
+Authorization: Bearer {{access_token}}
+
+> {%
+    var test_response_status = 200;
+    client.test("Task completed successfully", function() {
+        client.assert(response.status === test_response_status, "Response status is not " + test_response_status);
+    });
+%}
+
+###

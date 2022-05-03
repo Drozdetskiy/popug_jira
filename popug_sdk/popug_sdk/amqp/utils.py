@@ -13,4 +13,5 @@ def get_connection_params(_config: AMQPSettings) -> pika.ConnectionParameters:
         _config.port,
         _config.virtual_host,
         credentials,
+        heartbeat=_config.heartbeat,
     )

@@ -1,5 +1,5 @@
+from api.v1.endpoints import hello_world
 from fastapi import APIRouter
-from src.api.v1.endpoints import hello_world
 
 api_router = APIRouter()
 
