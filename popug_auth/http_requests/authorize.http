@@ -1,0 +1,5 @@
+# @no-redirect
+GET http://0.0.0.0:8080/v1/oauth/authorize?beak_shape=asdf&response_type=code&redirect_uri=http%3A%2F%2Ffoo.com%2F
+Accept: application/json
+
+###

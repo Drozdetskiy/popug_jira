@@ -1,0 +1,4 @@
+POST http://0.0.0.0:8080/v1/oauth/token?grant_type=authorization_code&code=8f19b3e5cb764c65a90d4b09d6f18a3f
+Accept: application/json
+
+###
