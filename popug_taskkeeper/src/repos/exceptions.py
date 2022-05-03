@@ -1,0 +1,2 @@
+class InvalidUserDataError(Exception):
+    pass

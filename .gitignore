@@ -8,4 +8,5 @@ pgp/
 __pycache__/
 tmp
 tmp.py
-.env
+#.env
+.env.*

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.schemas.hello_world import HelloWorldModel
+from schemas.hello_world import HelloWorldModel
 
 __all__ = ("router",)
 

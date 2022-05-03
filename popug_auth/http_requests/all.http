@@ -1,0 +1,2 @@
+# Initial request for collecting other requests
+GET http://{{host}}/

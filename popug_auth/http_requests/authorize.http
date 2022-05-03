@@ -1,0 +1,46 @@
+### Get auth code
+# @no-redirect
+GET http://{{host}}/v1/oauth/authorize?beak_shape={{beak_shape}}&response_type=code&redirect_uri={{redirect_uri}}
+Accept: application/json
+
+> {%
+    var test_response_status = 307;
+    client.test("Auth code get successfully", function() {
+        client.assert(response.status === test_response_status, "Response status is not " + test_response_status);
+    });
+
+    var code = response.headers.valueOf("location").split("code=")[1];
+    client.global.set("code", code);
+%}
+###
+
+### Get access token with auth code
+POST http://{{host}}/v1/oauth/token?grant_type=authorization_code&code={{code}}
+Accept: application/json
+
+> {%
+    var test_response_status = 201;
+    client.test("Access token get successfully", function() {
+        client.assert(response.status === test_response_status, "Response status is not " + test_response_status);
+    });
+    client.global.set("access_token", response.body.result.access_token);
+    client.global.set("refresh_token", response.body.result.refresh_token);
+%}
+
+###
+
+### Get access token with refresh token
+POST http://{{host}}/v1/oauth/token?grant_type=refresh_token&refresh_token={{refresh_token}}
+Accept: application/json
+
+> {%
+    var test_response_status = 201;
+    client.test("Access token get successfully", function() {
+        client.assert(response.status === test_response_status, "Response status is not " + test_response_status);
+    });
+
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+###
