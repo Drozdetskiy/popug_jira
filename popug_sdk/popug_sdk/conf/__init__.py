@@ -5,6 +5,7 @@ import os
 from functools import lru_cache
 from typing import (
     TYPE_CHECKING,
+    Any,
     Type,
 )
 
@@ -19,7 +20,7 @@ class Settings:
 
     @classmethod
     @lru_cache
-    def load(cls) -> BaseSettings:
+    def load(cls) -> Any:
         settings_module = os.environ.get(
             cls.ENVIRONMENT_VARIABLE, "popug_sdk.conf.global_settings"
         )
