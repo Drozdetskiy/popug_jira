@@ -1,5 +1,8 @@
 from contextlib import contextmanager
-from typing import Any
+from typing import (
+    Any,
+    Generator,
+)
 
 from sqlalchemy import create_engine as _engine_create
 from sqlalchemy.engine import Engine
@@ -9,7 +12,7 @@ from sqlalchemy.orm import (
 )
 
 from popug_sdk.conf import settings
-from popug_sdk.db.registry import mapper_registry
+from popug_sdk.db.registry import mapper_registry  # noqa
 
 __all__ = (
     "create_engine",
@@ -44,11 +47,13 @@ def init_db() -> sessionmaker:
             expire_on_commit=False,
         )
 
-        return _Session
+    return _Session
 
 
 @contextmanager
-def create_session(session: Session | None = None, **kwargs: Any) -> Session:
+def create_session(
+    session: Session | None = None, **kwargs: Any
+) -> Generator[Session, None, None]:
     if not session:
         _session = init_db()
 

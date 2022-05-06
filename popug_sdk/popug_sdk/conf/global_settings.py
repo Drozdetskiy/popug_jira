@@ -10,6 +10,7 @@ from pydantic import (
 __all__ = ("Settings",)
 
 from popug_sdk.conf.amqp import AMQPSettings
+from popug_sdk.conf.auth import AuthSettings
 from popug_sdk.conf.constants import (
     BASE_NAME,
     LOCALHOST,
@@ -47,6 +48,8 @@ class Settings(BaseSettings):
     database: DatabaseSettings = Field(default_factory=DatabaseSettings)
     amqp: dict[str, AMQPSettings] = Field(default_factory=dict)
     redis: dict[str, RedisSettings] = Field(default_factory=dict)
+
+    auth: AuthSettings = Field(default_factory=AuthSettings)
 
     @property
     def database_dsn(self) -> str:

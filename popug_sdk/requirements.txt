@@ -3,3 +3,5 @@ ipython
 pydantic
 typer
 uvicorn
+PyJWT
+cryptography
