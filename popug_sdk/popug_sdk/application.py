@@ -60,10 +60,10 @@ def startup() -> None:
 
         init_db()
 
-    if settings.redis:
+    if settings.redis_configs:
         from popug_sdk.redis.redis_pool import init_redis_pool  # noqa
 
-        init_redis_pool(settings.redis)
+        init_redis_pool(settings.redis_configs, settings.redis)
 
 
 @app.on_event("shutdown")
@@ -71,4 +71,4 @@ def shutdown() -> None:
     if settings.redis:
         from popug_sdk.redis.redis_pool import close_redis_pool  # noqa
 
-        close_redis_pool(settings.redis.keys())
+        close_redis_pool(settings.redis_configs)

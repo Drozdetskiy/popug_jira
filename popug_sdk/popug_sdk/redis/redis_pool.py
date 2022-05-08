@@ -2,16 +2,22 @@ from typing import Iterable
 
 from redis import ConnectionPool
 
-from popug_sdk.conf.redis import RedisSettings
+from popug_sdk.conf.redis import (
+    RedisConfigSettings,
+    RedisSettings,
+)
 
 _redis_pools: dict[str, ConnectionPool] = {}
 
 
-def init_redis_pool(config: dict[str, RedisSettings]) -> None:
-    close_redis_pool(config.keys())
+def init_redis_pool(
+    config_names: list[str], config: RedisConfigSettings
+) -> None:
+    close_redis_pool(config_names)
     _redis_pools.clear()
 
-    for config_name, redis_pool_config in config.items():
+    for config_name in config_names:
+        redis_pool_config: RedisSettings = getattr(config, config_name)
         _redis_pools[config_name] = ConnectionPool(
             host=redis_pool_config.host,
             port=redis_pool_config.port,

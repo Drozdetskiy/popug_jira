@@ -1,4 +1,5 @@
-from collections import deque
+from __future__ import annotations
+
 from typing import (
     Generic,
     TypeVar,
@@ -7,6 +8,7 @@ from typing import (
 from sqlalchemy.orm import Session
 
 RepoData = TypeVar("RepoData")
+RepoT = TypeVar("RepoT", bound="BaseRepo")  # type: ignore
 
 
 class NoContextError(Exception):
@@ -17,13 +19,19 @@ class BaseRepo(Generic[RepoData]):
     def __init__(
         self,
         session: Session,
+        context: RepoData | None = None,
     ):
         self._session = session
-        self._context_stack: deque[RepoData] = deque()
+        self._context = context
+
+    def __call__(self, context: RepoData | None) -> RepoT:
+        self._context = context
+
+        return self  # type: ignore
 
     @property
     def is_empty(self) -> bool:
-        return not self._context_stack
+        return self._context is None
 
     def status(self) -> RepoData:
         self._session.flush()
@@ -31,22 +39,16 @@ class BaseRepo(Generic[RepoData]):
         return self.get()
 
     def apply(self) -> RepoData:
+        result = self.get()
         self._session.commit()
 
-        return self.get()
+        return result
 
     def get(self) -> RepoData:
-        if not self._context_stack:
+        if self._context is None:
             raise NoContextError
 
-        return self._context_stack.pop()
+        return self._context
 
     def first(self) -> RepoData | None:
-        if self._context_stack:
-            return self._context_stack.pop()
-
-        return None
-
-    def _append_context(self, context: RepoData) -> None:
-        if context is not None:
-            self._context_stack.append(context)
+        return self._context
