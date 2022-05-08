@@ -1,9 +1,10 @@
-import json
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
 from constants import (
     Entities,
+    EventTitles,
     EventTypes,
     UserRoles,
 )
@@ -11,76 +12,61 @@ from pydantic import (
     BaseModel,
     Field,
 )
-from schemas.user import UserInfoSimpleSchema
+from pydantic.dataclasses import dataclass as pydantic_dataclass
 from utils import get_pid
 
 
-class EventLogCreateBaseSchema(BaseModel):
-    pid: str = Field(default_factory=get_pid)
-    type: EventTypes
-    entity: Entities = Field(default=Entities.USER)
-    version: int = Field(1, gt=0)
-
-
-class EventLogBaseSchema(BaseModel):
-    type: EventTypes
-    id: int
+@pydantic_dataclass
+@dataclass
+class UserSimpleData:
     pid: str
-    entity: Entities
-    version: int
-    processed: bool
-    next_retry_at: datetime | None
-    retry_count: int
-    created_at: datetime
-    updated_at: datetime
+    username: str
+    email: str
+    role: UserRoles
 
 
-class UserAddedDataSchema(BaseModel):
-    old_data: dict[str, Any] = Field(default_factory=dict)
-    new_data: UserInfoSimpleSchema
-
-
-class EventLogUserAddedCreateSchema(EventLogCreateBaseSchema):
-    type: EventTypes = EventTypes.ADDED
-    data: UserAddedDataSchema
-
-
-class EventLogUserAddedSchema(EventLogBaseSchema):
-    data: UserAddedDataSchema
-
-
-class UserRoleChangedDataSchema(BaseModel):
+@pydantic_dataclass
+@dataclass
+class UserRoleChangedData:
     pid: str
     role: UserRoles
 
-    # TODO: Fix
-    def dict(self, *args: Any, **kwargs: Any) -> Any:
-        return json.loads(self.json(*args, **kwargs))
 
-
-class EventLogUserRoleChangedDataSchema(BaseModel):
-    old_data: UserRoleChangedDataSchema
-    new_data: UserRoleChangedDataSchema
-
-
-class EventLogUserRoleChangedCreateSchema(EventLogCreateBaseSchema):
-    type: EventTypes = EventTypes.ROLE_CHANGED
-    data: EventLogUserRoleChangedDataSchema
-
-
-class EventLogUserRoleChangedSchema(EventLogBaseSchema):
-    data: EventLogUserRoleChangedDataSchema
-
-
-class UserDeletedDataSchema(BaseModel):
-    old_data: UserInfoSimpleSchema
+class EventLogDataSchema(BaseModel):
+    old_data: dict[str, Any] = Field(default_factory=dict)
     new_data: dict[str, Any] = Field(default_factory=dict)
 
 
-class EventLogUserDeletedCreateSchema(EventLogCreateBaseSchema):
-    type: EventTypes = EventTypes.DELETED
-    data: UserDeletedDataSchema
+class EventLogInitSchema(BaseModel):
+    pid: str = Field(default_factory=get_pid)
+    type: EventTypes = EventTypes.DATA_STREAMING
+    entity: Entities = Field(default=Entities.USER)
+    version: int = Field(1, gt=0)
+    data: EventLogDataSchema = Field(default_factory=EventLogDataSchema)
 
 
-class EventLogUserDeletedSchema(EventLogBaseSchema):
-    data: UserDeletedDataSchema
+class EventLogUserAddedInitSchema(EventLogInitSchema):
+    title: EventTitles = EventTitles.ADDED
+    type: EventTypes = EventTypes.BUSINESS_CALL
+
+
+class EventLogUserRoleChangedInitSchema(EventLogInitSchema):
+    title: EventTitles = EventTitles.ROLE_CHANGED
+    type: EventTypes = EventTypes.BUSINESS_CALL
+
+
+class EventLogUserDeletedInitSchema(EventLogInitSchema):
+    title: EventTitles = EventTitles.DELETED
+
+
+class EventLogSchema(BaseModel):
+    title: EventTitles
+    id: int
+    pid: str
+    entity: Entities
+    type: EventTypes
+    version: int
+    data: EventLogDataSchema
+    processed: bool
+    created_at: datetime
+    updated_at: datetime

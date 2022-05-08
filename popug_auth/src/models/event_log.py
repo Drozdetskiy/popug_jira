@@ -7,6 +7,7 @@ from typing import Any
 
 from constants import (
     Entities,
+    EventTitles,
     EventTypes,
 )
 from sqlalchemy import (
@@ -42,7 +43,14 @@ class EventLog:
             default=Entities.USER,
             server_default=text(f"'{Entities.USER.value}'"),
         ),
-        Column("type", Enum(EventTypes), nullable=False),
+        Column("title", Enum(EventTitles), nullable=False),
+        Column(
+            "type",
+            Enum(EventTypes),
+            nullable=False,
+            default=EventTypes.DATA_STREAMING,
+            server_default=text(f"'{EventTypes.DATA_STREAMING.value}'"),
+        ),
         Column(
             "version",
             Integer,
@@ -64,14 +72,6 @@ class EventLog:
             default=False,
             server_default=text("false"),
         ),
-        Column("next_retry_at", DateTime),
-        Column(
-            "retry_count",
-            Integer,
-            nullable=False,
-            default=0,
-            server_default=text("0"),
-        ),
         Column(
             "created_at",
             DateTime,
@@ -89,14 +89,13 @@ class EventLog:
         ),
     )
 
-    type: EventTypes
+    title: EventTitles
     id: int = field(init=False)
     pid: str = field(default_factory=get_pid)
-    entity: Entities = field(default=Entities.USER)
+    entity: Entities = Entities.USER
+    type: EventTypes = EventTypes.DATA_STREAMING
     version: int = 1
     data: dict[str, Any] = field(default_factory=dict)
     processed: bool = False
-    next_retry_at: datetime | None = None
-    retry_count: int = 0
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)

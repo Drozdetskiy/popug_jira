@@ -6,7 +6,6 @@ from pydantic import (
 from popug_sdk.conf.auth import AuthSettings as BaseAuthSettings
 from popug_sdk.conf.db import DatabaseSettings as BaseDatabaseSettings
 from popug_sdk.conf.global_settings import Settings as BaseSettings
-from popug_sdk.conf.redis import RedisSettings
 
 PROGECT_NAME = "popug_auth"
 
@@ -36,8 +35,6 @@ class Settings(BaseSettings):
     use_https = False
     database: DatabaseSettings = Field(default_factory=DatabaseSettings)
     security: SecuritySettings = Field(default_factory=SecuritySettings)
-    redis: dict[str, RedisSettings] = Field(
-        default_factory=lambda: {"default": RedisSettings()}
-    )
+    redis_configs: list[str] = Field(default_factory=lambda: ["default"])
     redirect_uris: list[str] = Field(default_factory=list)
     auth: AuthSettings = Field(default_factory=AuthSettings)

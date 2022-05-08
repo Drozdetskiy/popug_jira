@@ -1,22 +1,8 @@
-import json
-from typing import Any
-
 from constants import UserRoles
 from pydantic import BaseModel
 
 
-class UserInfoSimpleSchema(BaseModel):
-    pid: str
-    username: str
-    email: str
-    role: UserRoles
-
-    # TODO: Fix this
-    def dict(self, *args: Any, **kwargs: Any) -> Any:
-        return json.loads(self.json(*args, **kwargs))
-
-
-class UserInfoSchema(UserInfoSimpleSchema):
+class UserInfoSchema(BaseModel):
     id: int
     pid: str
     username: str

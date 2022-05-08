@@ -39,7 +39,20 @@ class Entities(enum.Enum):
 
 
 @enum.unique
-class EventTypes(enum.Enum):
+class EventTitles(enum.Enum):
     ADDED = "ADDED"
     ROLE_CHANGED = "ROLE_CHANGED"
     DELETED = "DELETED"
+
+
+@enum.unique
+class EventTypes(enum.Enum):
+    BUSINESS_CALL = "BUSINESS_CALL"
+    DATA_STREAMING = "DATA_STREAMING"
+
+
+@enum.unique
+class UserEvents(enum.Enum):
+    USER_ADDED = "USER_ADDED"
+    USER_ROLE_CHANGED = "USER_ROLE_CHANGED"
+    USER_DELETED = "USER_DELETED"

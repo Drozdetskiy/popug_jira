@@ -2,7 +2,7 @@
 
 Revision ID: 0002
 Revises: 0001
-Create Date: 2022-05-08 05:15:44.889915
+Create Date: 2022-05-09 00:37:38.006506
 
 """
 import sqlalchemy as sa
@@ -28,8 +28,14 @@ def upgrade():
             nullable=False,
         ),
         sa.Column(
+            "title",
+            sa.Enum("ADDED", "ROLE_CHANGED", "DELETED", name="eventtitles"),
+            nullable=False,
+        ),
+        sa.Column(
             "type",
-            sa.Enum("ADDED", "ROLE_CHANGED", "DELETED", name="eventtypes"),
+            sa.Enum("BUSINESS_CALL", "DATA_STREAMING", name="eventtypes"),
+            server_default=sa.text("'DATA_STREAMING'"),
             nullable=False,
         ),
         sa.Column(
@@ -45,13 +51,6 @@ def upgrade():
             "processed",
             sa.Boolean(),
             server_default=sa.text("false"),
-            nullable=False,
-        ),
-        sa.Column("next_retry_at", sa.DateTime(), nullable=True),
-        sa.Column(
-            "retry_count",
-            sa.Integer(),
-            server_default=sa.text("0"),
             nullable=False,
         ),
         sa.Column(

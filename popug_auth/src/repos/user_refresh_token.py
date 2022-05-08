@@ -20,19 +20,17 @@ class UserRefreshTokenRepo(BaseRepo[UserRefreshToken]):
         user_refresh_token: UserRefreshToken | None = query.filter(
             UserRefreshToken.user_id == user_id
         ).first()
-        self._append_context(user_refresh_token)
 
-        return self
+        return self(user_refresh_token)
 
     def upsert_refresh_token(
         self, user_id: int, refresh_token: str
     ) -> UserRefreshTokenRepo:
-        if not self.is_empty:
-            raise Exception("Cannot upsert refresh token while in context")
+        user_refresh_token = self.get_user_by_id(
+            user_id=user_id, lock=True
+        ).first()
 
-        self.get_user_by_id(user_id=user_id, lock=True)
-
-        if self.is_empty:
+        if not user_refresh_token:
             self._session.execute(
                 insert(UserRefreshToken)
                 .values(user_id=user_id, refresh_token=refresh_token)
@@ -43,9 +41,7 @@ class UserRefreshTokenRepo(BaseRepo[UserRefreshToken]):
             )
             self.get_user_by_id(user_id=user_id, lock=True)
         else:
-            user_refresh_token = self.get()
             user_refresh_token.refresh_token = refresh_token
             self._session.add(user_refresh_token)
-            self._append_context(user_refresh_token)
 
         return self
