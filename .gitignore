@@ -6,3 +6,5 @@ pgp/
 .mypy_cache/
 .tox/
 __pycache__/
+tmp
+tmp.py
