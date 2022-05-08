@@ -1,23 +1,16 @@
 from conf import SecuritySettings
-from constants import UserRoles
 from pydantic import BaseModel
+from schemas.user import UserInfoSchema
 
 from popug_sdk.conf import settings
 
 security_settings: SecuritySettings = settings.security
 
 
-class UserInfo(BaseModel):
-    pid: str
-    username: str
-    email: str
-    role: UserRoles
-
-
-class TokenResponseSchema(BaseModel):
+class TokenSchema(BaseModel):
     access_token: str
     refresh_token: str
     scopes: list[str]
-    info: UserInfo
+    info: UserInfoSchema
     token_type: str = "bearer"
     expires_in: int = security_settings.access_token_expiration

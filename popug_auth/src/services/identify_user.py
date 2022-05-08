@@ -14,6 +14,7 @@ from services.exceptions import (
 
 from popug_sdk.conf import settings
 from popug_sdk.db import create_session
+from popug_sdk.repos.base import NoContextError
 
 if TYPE_CHECKING:
     from redis import Redis as BaseRedis
@@ -25,10 +26,10 @@ else:
 
 def identify_user_by_beak_shape(beak_shape: str) -> User:
     with create_session() as session:
-        user = UserRepo(session).get_by_beak_shape(beak_shape)
-
-    if user is None:
-        raise UserNotFound(f"User with beak shape {beak_shape} not found")
+        try:
+            user = UserRepo(session).get_by_beak_shape(beak_shape).get()
+        except NoContextError:
+            raise UserNotFound(f"User with beak shape {beak_shape} not found")
 
     return user
 
@@ -40,10 +41,10 @@ def identify_user_by_auth_code(redis: Redis, code: str) -> User:
         raise AuthorizationCodeInvalid("Invalid authentication code")
 
     with create_session() as session:
-        user = UserRepo(session).get_by_id(user_id=int(user_id))
-
-    if not user:
-        raise UserNotFound(f"User with id {user_id} not found")
+        try:
+            user = UserRepo(session).get_by_id(user_id=int(user_id)).get()
+        except NoContextError:
+            raise UserNotFound(f"User with id {user_id} not found")
 
     return user
 
@@ -64,9 +65,9 @@ def identify_user_by_refresh_token(token: str) -> User:
         raise InvalidTokenException("Invalid token data")
 
     with create_session() as session:
-        user = UserRepo(session).get_by_pid(pid=pid)
-
-    if not user:
-        raise UserNotFound(f"User with pid {pid} not found")
+        try:
+            user = UserRepo(session).get_by_pid(pid=pid).get()
+        except NoContextError:
+            raise UserNotFound(f"User with pid {pid} not found")
 
     return user

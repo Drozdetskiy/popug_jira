@@ -56,9 +56,12 @@ class User:
     email: str
     beak_shape: str
     id: int = field(init=False)
-    refresh_token: Optional[UserRefreshToken] = field(init=False)
     pid: str = field(default_factory=get_pid)
     role: UserRoles = field(default=UserRoles.EMPLOYEE)
+
+    @property
+    def refresh_token(self) -> Optional[UserRefreshToken]:
+        raise NotImplementedError
 
     __mapper_args__ = {  # type: ignore
         "properties": {
@@ -97,10 +100,13 @@ class UserRefreshToken:
 
     user_id: int
     refresh_token: str
-    user: User = field(init=False)
     id: int = field(init=False)
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
+
+    @property
+    def user(self) -> User:
+        raise NotImplementedError
 
     __mapper_args__ = {  # type: ignore
         "properties": {

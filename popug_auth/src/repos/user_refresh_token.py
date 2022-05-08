@@ -1,25 +1,38 @@
+from __future__ import annotations
+
+from typing import Any
+
 from models import UserRefreshToken
-from repos.base import BaseRepo
 from sqlalchemy.dialects.postgresql import insert
 
+from popug_sdk.repos.base import BaseRepo
 
-class UserRefreshTokenRepo(BaseRepo):
-    def get_user_by_id(self, user_id: int) -> UserRefreshToken | None:
-        return (
-            self._session.query(UserRefreshToken)
-            .filter(UserRefreshToken.user_id == user_id)
-            .first()
-        )
 
-    def upsert(self, user_id: int, refresh_token: str) -> None:
-        user_refresh_token = (
-            self._session.query(UserRefreshToken)
-            .with_for_update()
-            .filter(UserRefreshToken.user_id == user_id)
-            .first()
-        )
+class UserRefreshTokenRepo(BaseRepo[UserRefreshToken]):
+    def get_user_by_id(
+        self, user_id: int, lock: bool = False, **lock_params: Any
+    ) -> UserRefreshTokenRepo:
+        query = self._session.query(UserRefreshToken)
 
-        if user_refresh_token is None:
+        if lock:
+            query = query.with_for_update(**lock_params)
+
+        user_refresh_token: UserRefreshToken | None = query.filter(
+            UserRefreshToken.user_id == user_id
+        ).first()
+        self._append_context(user_refresh_token)
+
+        return self
+
+    def upsert_refresh_token(
+        self, user_id: int, refresh_token: str
+    ) -> UserRefreshTokenRepo:
+        if not self.is_empty:
+            raise Exception("Cannot upsert refresh token while in context")
+
+        self.get_user_by_id(user_id=user_id, lock=True)
+
+        if self.is_empty:
             self._session.execute(
                 insert(UserRefreshToken)
                 .values(user_id=user_id, refresh_token=refresh_token)
@@ -28,6 +41,11 @@ class UserRefreshTokenRepo(BaseRepo):
                     set_={"refresh_token": refresh_token},
                 )
             )
+            self.get_user_by_id(user_id=user_id, lock=True)
         else:
+            user_refresh_token = self.get()
             user_refresh_token.refresh_token = refresh_token
             self._session.add(user_refresh_token)
+            self._append_context(user_refresh_token)
+
+        return self

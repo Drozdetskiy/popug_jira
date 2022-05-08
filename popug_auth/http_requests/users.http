@@ -1,0 +1,94 @@
+### Get auth code
+# @no-redirect
+GET http://{{host}}/v1/oauth/authorize?beak_shape={{beak_shape}}&response_type=code&redirect_uri={{redirect_uri}}
+Accept: application/json
+
+> {%
+    var code = response.headers.valueOf("location").split("code=")[1];
+    client.global.set("code", code);
+%}
+###
+
+### Get access token
+POST http://{{host}}/v1/oauth/token?grant_type=authorization_code&code={{code}}
+Accept: application/json
+
+> {%
+    client.global.set("access_token", response.body.result.access_token);
+    client.global.set("refresh_token", response.body.result.refresh_token);
+%}
+
+### Get users list
+GET http://{{host}}/v1/users
+Authorization: Bearer {{access_token}}
+
+> {%
+    var test_response_status = 200;
+    client.test("Users list get successfully", function() {
+        client.assert(response.status === test_response_status, "Response status is not " + test_response_status);
+    });
+    client.global.set("user_id", response.body.result[0].id);
+%}
+
+### Get user
+GET http://{{host}}/v1/users/{{user_id}}
+Authorization: Bearer {{access_token}}
+
+> {%
+    var test_response_status = 200;
+    client.test("User get successfully", function() {
+        client.assert(response.status === test_response_status, "Response status is not " + test_response_status);
+    });
+%}
+
+### Create user
+POST http://{{host}}/v1/users
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "username": "{{$uuid}}",
+  "email": "{{$uuid}}",
+  "beak_shape": "{{$uuid}}"
+}
+
+> {%
+    var test_response_status = 201;
+    client.test("User created successfully", function() {
+        client.assert(response.status === test_response_status, "Response status is not " + test_response_status);
+    });
+    client.global.set("created_user_id", response.body.result.id);
+%}
+
+###
+
+### Patch user
+PATCH http://{{host}}/v1/users/{{created_user_id}}
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "role": "ADMIN"
+}
+
+> {%
+    var test_response_status = 200;
+    client.test("User patched successfully", function() {
+        client.assert(response.status === test_response_status, "Response status is not " + test_response_status);
+    });
+%}
+
+###
+
+### Delete user
+DELETE http://{{host}}/v1/users/{{created_user_id}}
+Authorization: Bearer {{access_token}}
+
+> {%
+    var test_response_status = 200;
+    client.test("User deleted successfully", function() {
+        client.assert(response.status === test_response_status, "Response status is not " + test_response_status);
+    });
+%}
+
+###

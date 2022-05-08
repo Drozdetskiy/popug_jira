@@ -27,7 +27,8 @@ def issue_token_pair(user: User) -> TokenPair:
     )
 
     with create_session() as session:
-        UserRefreshTokenRepo(session).upsert(user.id, refresh_token)
-        session.commit()
+        UserRefreshTokenRepo(session).upsert_refresh_token(
+            user.id, refresh_token
+        ).apply()
 
     return TokenPair(access_token, refresh_token)

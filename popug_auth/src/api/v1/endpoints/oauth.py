@@ -10,7 +10,7 @@ from fastapi import (
     HTTPException,
     Query,
 )
-from schemas.token import TokenResponseSchema
+from schemas.token import TokenSchema
 from services.exceptions import (
     AuthorizationCodeInvalid,
     InvalidTokenException,
@@ -28,6 +28,8 @@ from starlette.responses import RedirectResponse
 from utils import get_scopes
 
 from popug_sdk.dependencies.redis import get_redis
+from popug_sdk.response.response import get_response_data
+from popug_sdk.schemas.response_schema import get_response_schema
 
 if TYPE_CHECKING:
     from redis import Redis as BaseRedis
@@ -40,7 +42,7 @@ router = APIRouter()
 
 
 @router.get("/authorize")
-def authorize(
+def make_authorize(
     beak_shape: str,
     response_type: str,
     redirect_uri: str = Depends(get_redirect_uri),
@@ -64,9 +66,10 @@ def authorize(
 
 @router.post(
     "/token",
-    response_model=TokenResponseSchema,
+    response_model=get_response_schema(TokenSchema),
+    status_code=status.HTTP_201_CREATED,
 )
-def token(
+def get_token_pair(
     grant_type: str = Query(...),
     _: str = Query("", alias="client_id"),
     __: str = Query("", alias="client_secret"),
@@ -104,14 +107,17 @@ def token(
 
     token_pair = issue_token_pair(user)
 
-    return {
-        "access_token": token_pair.access_token,
-        "refresh_token": token_pair.refresh_token,
-        "scopes": get_scopes(user.role),
-        "info": {
-            "pid": user.pid,
-            "username": user.username,
-            "email": user.email,
-            "role": user.role,
-        },
-    }
+    return get_response_data(
+        {
+            "access_token": token_pair.access_token,
+            "refresh_token": token_pair.refresh_token,
+            "scopes": get_scopes(user.role),
+            "info": {
+                "id": user.id,
+                "pid": user.pid,
+                "username": user.username,
+                "email": user.email,
+                "role": user.role,
+            },
+        }
+    )

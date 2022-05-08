@@ -12,3 +12,7 @@ class AuthorizationCodeInvalid(BaseServiceException):
 
 class InvalidTokenException(BaseServiceException):
     pass
+
+
+class UserAlreadyExists(BaseServiceException):
+    pass
