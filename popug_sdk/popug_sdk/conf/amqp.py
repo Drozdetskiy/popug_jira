@@ -50,3 +50,7 @@ class AMQPSettings(BaseModel):
             port=self.port,
             virtualhost=self.virtual_host,
         )
+
+
+class AMQPConfigSettings(BaseModel):
+    default: AMQPSettings = Field(default_factory=AMQPSettings)

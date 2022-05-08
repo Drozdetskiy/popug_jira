@@ -20,7 +20,9 @@ def get_token_data(token: str = Depends(oauth2_schema)) -> dict[str, Any]:
 
     try:
         token_payload: dict[str, Any] = jwt.decode(
-            token, auth_settings.public_key, algorithms=auth_settings.algorithm
+            token,
+            auth_settings.public_key,
+            algorithms=[auth_settings.algorithm],
         )
     except PyJWTError:
         raise HTTPException(

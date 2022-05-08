@@ -7,9 +7,7 @@ from pydantic import (
     Field,
 )
 
-__all__ = ("Settings",)
-
-from popug_sdk.conf.amqp import AMQPSettings
+from popug_sdk.conf.amqp import AMQPConfigSettings
 from popug_sdk.conf.auth import AuthSettings
 from popug_sdk.conf.constants import (
     BASE_NAME,
@@ -18,7 +16,7 @@ from popug_sdk.conf.constants import (
     PortType,
 )
 from popug_sdk.conf.db import DatabaseSettings
-from popug_sdk.conf.redis import RedisSettings
+from popug_sdk.conf.redis import RedisConfigSettings
 
 
 class AppSettings(BaseModel):
@@ -46,8 +44,9 @@ class Settings(BaseSettings):
     app: AppSettings = Field(default_factory=AppSettings)
     alembic: AlembicSettings = Field(default_factory=AlembicSettings)
     database: DatabaseSettings = Field(default_factory=DatabaseSettings)
-    amqp: dict[str, AMQPSettings] = Field(default_factory=dict)
-    redis: dict[str, RedisSettings] = Field(default_factory=dict)
+    amqp: AMQPConfigSettings = Field(default_factory=AMQPConfigSettings)
+    redis: RedisConfigSettings = Field(default_factory=RedisConfigSettings)
+    redis_configs: list[str] = Field(default_factory=list)
 
     auth: AuthSettings = Field(default_factory=AuthSettings)
 

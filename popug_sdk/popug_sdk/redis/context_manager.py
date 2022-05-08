@@ -12,7 +12,7 @@ from popug_sdk.redis.redis_pool import (
 
 @contextmanager
 def redis_pool(config_name: str) -> Generator[ConnectionPool, None, None]:
-    init_redis_pool({config_name: settings.redis[config_name]})
+    init_redis_pool([config_name], settings.redis)
     pool = get_redis_pool(config_name)
 
     try:
