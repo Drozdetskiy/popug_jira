@@ -50,5 +50,5 @@ class BaseRepo(Generic[RepoData]):
 
         return self._context
 
-    def first(self) -> RepoData | None:
+    def context(self) -> RepoData | None:
         return self._context
