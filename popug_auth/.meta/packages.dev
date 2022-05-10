@@ -1,0 +1,11 @@
+-r packages
+
+tox==3.25.0
+flake8==4.0.1
+flake8-quotes==3.3.1
+isort==5.10.1
+pre-commit==2.18.1
+twine==4.0.0
+black==22.3.0
+mypy==0.950
+sqlalchemy[mypy]
