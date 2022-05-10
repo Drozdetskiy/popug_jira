@@ -39,7 +39,7 @@ class BaseProducer:
                 self._connection = pika.BlockingConnection(parameters)
 
             if self.is_closed_channel:
-                self.channel = self._connection.channel()  # type: ignore
+                self._channel = self._connection.channel()  # type: ignore
 
             if self._init_exchange is True:
                 logger.info(
@@ -62,7 +62,10 @@ class BaseProducer:
             f"exchange {self._config.exchange.name}, message {body!r}"
         )
 
-        self.channel.basic_publish(
+        if not self._channel:
+            raise Exception("Channel is not initialized")
+
+        self._channel.basic_publish(
             exchange=self._config.exchange.name,
             routing_key=routing_key,
             body=body,

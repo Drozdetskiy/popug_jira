@@ -28,8 +28,8 @@ class AppSettings(BaseModel):
 
 
 class AlembicSettings(BaseModel):
-    config: str = "src/alembic/alembic.ini"
-    directory: str = "src/alembic"
+    config: str = "src/alembic_config/alembic.ini"
+    directory: str = "src/alembic_config"
 
 
 class Settings(BaseSettings):
