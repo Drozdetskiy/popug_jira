@@ -5,7 +5,6 @@ from dataclasses import (
     field,
 )
 
-from constants import UserRoles
 from sqlalchemy import (
     Boolean,
     Column,
@@ -16,6 +15,7 @@ from sqlalchemy import (
     text,
 )
 
+from popug_schema_registry.models.v1.task_created_event_schema import UserRoles
 from popug_sdk.db import mapper_registry
 
 

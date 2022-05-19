@@ -2,17 +2,21 @@ from __future__ import annotations
 
 from typing import Any
 
-from constants import TaskStatus
 from models import (
     Task,
     User,
 )
 
+from popug_schema_registry.models.v1.task_created_event_schema import (
+    TaskStatus,
+)
 from popug_sdk.repos.base import BaseRepo
 
 
 class TaskRepo(BaseRepo[Task]):
-    def get_by_id(self, id_: int, lock: bool = False, **lock_params: Any):
+    def get_by_id(
+        self, id_: int, lock: bool = False, **lock_params: Any
+    ) -> TaskRepo:
         query = self._session.query(Task).outerjoin(User)
 
         if lock:
@@ -38,7 +42,7 @@ class TaskRepo(BaseRepo[Task]):
 
         return self(task)
 
-    def create_task(self, **data: dict[str, Any]) -> TaskRepo:
+    def create_task(self, **data: Any) -> TaskRepo:
         task = Task(**data)
 
         self._session.add(task)
