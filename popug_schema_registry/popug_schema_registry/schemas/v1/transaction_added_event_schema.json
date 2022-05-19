@@ -1,0 +1,99 @@
+{
+    "title": "TransactionAddedEventSchema",
+    "type": "object",
+    "properties": {
+        "version": {
+            "title": "Version",
+            "default": 1,
+            "type": "integer"
+        },
+        "produced_at": {
+            "title": "Produced At",
+            "type": "string",
+            "format": "date-time"
+        },
+        "title": {
+            "default": "TRANSACTION.ADDED",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/EventTitleTransactionAdded"
+                }
+            ]
+        },
+        "data": {
+            "$ref": "#/definitions/TransactionAddedDataSchema"
+        },
+        "producer": {
+            "default": "POPUG_ACCOUNTING",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/AccountingProducer"
+                }
+            ]
+        }
+    },
+    "required": [
+        "data"
+    ],
+    "definitions": {
+        "EventTitleTransactionAdded": {
+            "title": "EventTitleTransactionAdded",
+            "description": "An enumeration.",
+            "enum": [
+                "TRANSACTION.ADDED"
+            ]
+        },
+        "TransactionTypes": {
+            "title": "TransactionTypes",
+            "description": "An enumeration.",
+            "enum": [
+                "INCOME",
+                "EXPENSE",
+                "PAYMENT"
+            ]
+        },
+        "TransactionAddedDataSchema": {
+            "title": "TransactionAddedDataSchema",
+            "type": "object",
+            "properties": {
+                "public_id": {
+                    "title": "Public Id",
+                    "type": "string"
+                },
+                "user_public_id": {
+                    "title": "User Public Id",
+                    "type": "string"
+                },
+                "debit": {
+                    "title": "Debit",
+                    "type": "integer"
+                },
+                "credit": {
+                    "title": "Credit",
+                    "type": "integer"
+                },
+                "type": {
+                    "$ref": "#/definitions/TransactionTypes"
+                },
+                "task_public_id": {
+                    "title": "Task Public Id",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "public_id",
+                "user_public_id",
+                "debit",
+                "credit",
+                "type"
+            ]
+        },
+        "AccountingProducer": {
+            "title": "AccountingProducer",
+            "description": "An enumeration.",
+            "enum": [
+                "POPUG_ACCOUNTING"
+            ]
+        }
+    }
+}

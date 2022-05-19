@@ -1,0 +1,4 @@
+-r requirements.txt
+
+datamodel-code-generator==0.12.0
+twine==4.0.0
