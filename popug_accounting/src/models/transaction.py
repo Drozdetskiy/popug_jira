@@ -114,6 +114,6 @@ class Transaction:
         task = data["task"]
 
         if task:
-            data["task"] = TaskDTO(**task)
+            data["task"] = TaskDTO.get_dto_from_dict(**task)
 
         return TransactionDTO(**data)

@@ -25,7 +25,7 @@ def _send_billing_cycle_event(
     event = event_schema(
         data={
             "public_id": billing_cycle.public_id,
-            "status": billing_cycle.status,
+            "status": billing_cycle.status.value,
             "started_at": billing_cycle.started_at,
             "closed_at": billing_cycle.closed_at,
             "processed_at": billing_cycle.processed_at,
