@@ -4,3 +4,7 @@ class InvalidUserDataError(Exception):
 
 class NoActiveCycleError(Exception):
     pass
+
+
+class BillingCycleNotFound(Exception):
+    pass
