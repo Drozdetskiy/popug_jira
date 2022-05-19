@@ -1,0 +1,88 @@
+{
+    "title": "TaskCompletedEventSchema",
+    "type": "object",
+    "properties": {
+        "version": {
+            "title": "Version",
+            "default": 1,
+            "type": "integer"
+        },
+        "produced_at": {
+            "title": "Produced At",
+            "type": "string",
+            "format": "date-time"
+        },
+        "title": {
+            "default": "TASK.COMPLETED",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/EventTitleTaskCompleted"
+                }
+            ]
+        },
+        "data": {
+            "$ref": "#/definitions/TaskStatusChangedDataSchema"
+        },
+        "producer": {
+            "default": "POPUG_TASKKEEPER",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/TaskProducer"
+                }
+            ]
+        }
+    },
+    "required": [
+        "data"
+    ],
+    "definitions": {
+        "EventTitleTaskCompleted": {
+            "title": "EventTitleTaskCompleted",
+            "description": "An enumeration.",
+            "enum": [
+                "TASK.COMPLETED"
+            ]
+        },
+        "TaskStatus": {
+            "title": "TaskStatus",
+            "description": "An enumeration.",
+            "enum": [
+                "OPEN",
+                "DONE"
+            ]
+        },
+        "TaskStatusChangedDataSchema": {
+            "title": "TaskStatusChangedDataSchema",
+            "type": "object",
+            "properties": {
+                "public_id": {
+                    "title": "Public Id",
+                    "type": "string"
+                },
+                "assignee_public_id": {
+                    "title": "Assignee Public Id",
+                    "type": "string"
+                },
+                "old_status": {
+                    "$ref": "#/definitions/TaskStatus"
+                },
+                "new_status": {
+                    "$ref": "#/definitions/TaskStatus"
+                }
+            },
+            "required": [
+                "public_id",
+                "assignee_public_id",
+                "old_status",
+                "new_status"
+            ]
+        },
+        "TaskProducer": {
+            "title": "TaskProducer",
+            "description": "An enumeration.",
+            "enum": [
+                "POPUG_TASKKEEPER"
+            ]
+        }
+    }
+}

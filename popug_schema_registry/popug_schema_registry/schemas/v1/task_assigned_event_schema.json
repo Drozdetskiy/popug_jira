@@ -1,0 +1,76 @@
+{
+    "title": "TaskAssignedEventSchema",
+    "type": "object",
+    "properties": {
+        "version": {
+            "title": "Version",
+            "default": 1,
+            "type": "integer"
+        },
+        "produced_at": {
+            "title": "Produced At",
+            "type": "string",
+            "format": "date-time"
+        },
+        "title": {
+            "default": "TASK.ASSIGNED",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/EventTitleTaskAssigned"
+                }
+            ]
+        },
+        "data": {
+            "$ref": "#/definitions/TaskNewAssigneeDataSchema"
+        },
+        "producer": {
+            "default": "POPUG_TASKKEEPER",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/TaskProducer"
+                }
+            ]
+        }
+    },
+    "required": [
+        "data"
+    ],
+    "definitions": {
+        "EventTitleTaskAssigned": {
+            "title": "EventTitleTaskAssigned",
+            "description": "An enumeration.",
+            "enum": [
+                "TASK.ASSIGNED"
+            ]
+        },
+        "TaskNewAssigneeDataSchema": {
+            "title": "TaskNewAssigneeDataSchema",
+            "type": "object",
+            "properties": {
+                "public_id": {
+                    "title": "Public Id",
+                    "type": "string"
+                },
+                "old_assignee_public_id": {
+                    "title": "Old Assignee Public Id",
+                    "type": "string"
+                },
+                "new_assignee_public_id": {
+                    "title": "New Assignee Public Id",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "public_id",
+                "new_assignee_public_id"
+            ]
+        },
+        "TaskProducer": {
+            "title": "TaskProducer",
+            "description": "An enumeration.",
+            "enum": [
+                "POPUG_TASKKEEPER"
+            ]
+        }
+    }
+}

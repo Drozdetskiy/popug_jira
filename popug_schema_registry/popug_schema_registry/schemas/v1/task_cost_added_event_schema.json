@@ -1,0 +1,82 @@
+{
+    "title": "TaskCostAddedEventSchema",
+    "type": "object",
+    "properties": {
+        "version": {
+            "title": "Version",
+            "default": 1,
+            "type": "integer"
+        },
+        "produced_at": {
+            "title": "Produced At",
+            "type": "string",
+            "format": "date-time"
+        },
+        "title": {
+            "default": "TASK_COST.ADDED",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/EventTitleTaskCostAdded"
+                }
+            ]
+        },
+        "data": {
+            "$ref": "#/definitions/TaskCostAddedDataSchema"
+        },
+        "producer": {
+            "default": "POPUG_ACCOUNTING",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/AccountingProducer"
+                }
+            ]
+        }
+    },
+    "required": [
+        "data"
+    ],
+    "definitions": {
+        "EventTitleTaskCostAdded": {
+            "title": "EventTitleTaskCostAdded",
+            "description": "An enumeration.",
+            "enum": [
+                "TASK_COST.ADDED"
+            ]
+        },
+        "TaskCostAddedDataSchema": {
+            "title": "TaskCostAddedDataSchema",
+            "type": "object",
+            "properties": {
+                "public_id": {
+                    "title": "Public Id",
+                    "type": "string"
+                },
+                "task_public_id": {
+                    "title": "Task Public Id",
+                    "type": "string"
+                },
+                "debit_cost": {
+                    "title": "Debit Cost",
+                    "type": "integer"
+                },
+                "credit_cost": {
+                    "title": "Credit Cost",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "public_id",
+                "task_public_id",
+                "debit_cost",
+                "credit_cost"
+            ]
+        },
+        "AccountingProducer": {
+            "title": "AccountingProducer",
+            "description": "An enumeration.",
+            "enum": [
+                "POPUG_ACCOUNTING"
+            ]
+        }
+    }
+}

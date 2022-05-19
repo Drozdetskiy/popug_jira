@@ -1,0 +1,83 @@
+{
+    "title": "UserRoleChangedEventSchema",
+    "type": "object",
+    "properties": {
+        "version": {
+            "title": "Version",
+            "default": 1,
+            "type": "integer"
+        },
+        "produced_at": {
+            "title": "Produced At",
+            "type": "string",
+            "format": "date-time"
+        },
+        "title": {
+            "default": "USER.ROLE_CHANGED",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/EventTitleUserRoleChanged"
+                }
+            ]
+        },
+        "data": {
+            "$ref": "#/definitions/UserRoleChangedDataSchema"
+        },
+        "producer": {
+            "default": "POPUG_AUTH",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/UserProducer"
+                }
+            ]
+        }
+    },
+    "required": [
+        "data"
+    ],
+    "definitions": {
+        "EventTitleUserRoleChanged": {
+            "title": "EventTitleUserRoleChanged",
+            "description": "An enumeration.",
+            "enum": [
+                "USER.ROLE_CHANGED"
+            ]
+        },
+        "UserRoles": {
+            "title": "UserRoles",
+            "description": "An enumeration.",
+            "enum": [
+                "EMPLOYEE",
+                "ADMIN",
+                "MANAGER"
+            ]
+        },
+        "UserRoleChangedDataSchema": {
+            "title": "UserRoleChangedDataSchema",
+            "type": "object",
+            "properties": {
+                "public_id": {
+                    "title": "Public Id",
+                    "type": "string"
+                },
+                "old_role": {
+                    "$ref": "#/definitions/UserRoles"
+                },
+                "new_role": {
+                    "$ref": "#/definitions/UserRoles"
+                }
+            },
+            "required": [
+                "public_id",
+                "new_role"
+            ]
+        },
+        "UserProducer": {
+            "title": "UserProducer",
+            "description": "An enumeration.",
+            "enum": [
+                "POPUG_AUTH"
+            ]
+        }
+    }
+}
