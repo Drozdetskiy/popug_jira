@@ -7,7 +7,6 @@ from dataclasses import (
 from datetime import datetime
 from typing import Optional
 
-from constants import UserRoles
 from sqlalchemy import (
     Column,
     DateTime,
@@ -22,6 +21,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from utils import get_public_id
 
+from popug_schema_registry.models.v1.task_created_event_schema import UserRoles
 from popug_sdk.db import mapper_registry
 
 

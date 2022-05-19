@@ -1,12 +1,6 @@
 import enum
 
-
-# TODO: Move to client library
-@enum.unique
-class UserRoles(enum.Enum):
-    EMPLOYEE = "EMPLOYEE"
-    ADMIN = "ADMIN"
-    MANAGER = "MANAGER"
+from popug_schema_registry.models.v1.task_created_event_schema import UserRoles
 
 
 @enum.unique
@@ -47,13 +41,6 @@ ROLES_SCOPE_MAP = {
 
 
 USER_AUTH_CODE_TEMPLATE = "user.auth_code.%s"
-
-
-@enum.unique
-class EventTitles(enum.Enum):
-    USER_CREATED = "USER.CREATED"
-    USER_ROLE_CHANGED = "USER.ROLE_CHANGED"
-    USER_DELETED = "USER.DELETED"
 
 
 @enum.unique

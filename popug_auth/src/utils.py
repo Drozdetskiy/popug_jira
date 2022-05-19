@@ -2,10 +2,9 @@ import enum
 import uuid
 from typing import Any
 
-from constants import (
-    ROLES_SCOPE_MAP,
-    UserRoles,
-)
+from constants import ROLES_SCOPE_MAP
+
+from popug_schema_registry.models.v1.task_created_event_schema import UserRoles
 
 
 def get_public_id() -> str:
