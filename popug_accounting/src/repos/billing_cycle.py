@@ -14,6 +14,13 @@ from popug_sdk.repos.base import BaseRepo
 
 
 class BillingCycleRepo(BaseRepo[BillingCycle]):
+    def get_by_id(self, id_: int) -> BillingCycleRepo:
+        return self(
+            self._session.query(BillingCycle)
+            .filter(BillingCycle.id == id_)
+            .first()
+        )
+
     def get_last(
         self, lock: bool = False, **lock_params: Any
     ) -> BillingCycleRepo:
@@ -67,3 +74,21 @@ class BillingCycleRepo(BaseRepo[BillingCycle]):
         self._session.add(cycle)
 
         return self(cycle)
+
+
+class BillingCycleListRepo(BaseRepo[list[BillingCycle]]):
+    def get_list(
+        self,
+        limit: int,
+        offset: int,
+    ) -> BillingCycleListRepo:
+        return self(
+            self._session.query(BillingCycle)
+            .order_by(desc(BillingCycle.id))
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
+    def count_all(self) -> int:
+        return self._session.query(BillingCycle).count()
