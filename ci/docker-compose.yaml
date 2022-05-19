@@ -15,6 +15,14 @@ x-taskkeeper-base: &taskkeeper-base
     - .env
   working_dir: /home/httpd/app/src
 
+x-accounting-base: &accounting-base
+  image: drozdetskiy/popug-accounting-base:latest
+  volumes:
+    - ../popug_accounting/:/home/httpd/app/src
+  env_file:
+    - .env
+  working_dir: /home/httpd/app/src
+
 services:
   # ------- POPUG AUTH SERVICE -------
   popug_auth_main:
@@ -114,6 +122,91 @@ services:
     depends_on:
       - popug_taskkeeper_maintenance
 
+  # ------- POPUG ACCOUNTING SERVICE -------
+  popug_accounting_main:
+    <<: *accounting-base
+    command: python manage.py runserver
+    ports:
+      - "8082:8080"
+    depends_on:
+      - popug_accounting_maintenance
+
+  popug_accounting_redis:
+    image: redis:6.2.7-alpine
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+
+  popug_accounting_db:
+    image: postgres:14.2-alpine
+    volumes:
+      - popug-accounting-db-data:/var/lib/postgresql/data/pgdata
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=popug_accounting_db
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+
+  popug_accounting_maintenance:
+    <<: *accounting-base
+    command: sh -c "python manage.py migrate && python manage.py generate-test-data && tail -f /dev/null"
+    depends_on:
+      popug_accounting_db:
+        condition: service_healthy
+      popug_accounting_redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  popug_accounting_user_business_call_consumer_worker:
+    <<: *accounting-base
+    command: python manage.py user-business-call-events-consumer
+    depends_on:
+      - popug_accounting_maintenance
+
+  popug_accounting_user_data_streaming_consumer_worker:
+    <<: *accounting-base
+    command: python manage.py user-data-streaming-events-consumer
+    depends_on:
+      - popug_accounting_maintenance
+
+  popug_accounting_task_business_call_consumer_worker:
+    <<: *accounting-base
+    command: python manage.py task-business-call-events-consumer
+    depends_on:
+      - popug_accounting_maintenance
+
+  popug_accounting_task_data_streaming_consumer_worker:
+    <<: *accounting-base
+    command: python manage.py task-data-streaming-events-consumer
+    depends_on:
+      - popug_accounting_maintenance
+
+  popug_accounting_celery_beat:
+    <<: *accounting-base
+    command: celery -A src.celery_app beat -l INFO
+    depends_on:
+      - popug_accounting_maintenance
+
+  popug_accounting_celery_default_worker:
+    <<: *accounting-base
+    command: celery -A src.celery_app worker -l INFO
+    depends_on:
+      - popug_accounting_maintenance
+
+  popug_accounting_celery_send_payment_worker:
+    <<: *accounting-base
+    command: celery -A src.celery_app worker -l INFO -Q send_payment -n send_payment -c 2
+    depends_on:
+      - popug_accounting_maintenance
+
   # ------- POPUG SHARED SERVICES -------
   rabbitmq:
     image: rabbitmq:3.9.15-management
@@ -129,3 +222,4 @@ services:
 volumes:
   popug-auth-db-data:
   popug-taskkeeper-db-data:
+  popug-accounting-db-data:
