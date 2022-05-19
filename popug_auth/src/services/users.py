@@ -1,9 +1,6 @@
 from dataclasses import asdict
 
-from constants import (
-    EventTypes,
-    UserRoles,
-)
+from constants import EventTypes
 from events.user.producers import get_producer
 from events.utils import get_routing_key
 from models import User
@@ -11,18 +8,24 @@ from repos.user import (
     UserRepo,
     UsersListRepo,
 )
-from schemas.events import (
-    UserCreatedEventSchema,
-    UserDeletedEventSchema,
-    UserRoleChangedEventSchema,
-)
 from schemas.user import UserAddSchema
 from services.exceptions import (
     UserAlreadyExists,
     UserNotFound,
 )
 from sqlalchemy.exc import IntegrityError
+from utils import dict_factory
 
+from popug_schema_registry.models.v1.task_created_event_schema import UserRoles
+from popug_schema_registry.models.v1.user_created_event_schema import (
+    UserCreatedEventSchema,
+)
+from popug_schema_registry.models.v1.user_deleted_event_schema import (
+    UserDeletedEventSchema,
+)
+from popug_schema_registry.models.v1.user_role_changed_event_schema import (
+    UserRoleChangedEventSchema,
+)
 from popug_sdk.db import create_session
 from popug_sdk.repos.base import NoContextError
 
@@ -54,7 +57,9 @@ def create_user(data: UserAddSchema) -> User:
         except IntegrityError:
             raise UserAlreadyExists
 
-    event = UserCreatedEventSchema(data=asdict(user))
+    event = UserCreatedEventSchema(
+        data=asdict(user, dict_factory=dict_factory)
+    )
     producer = get_producer(EventTypes.DATA_STREAMING)
     producer.publish_message(
         event.json().encode("utf-8"),
@@ -79,8 +84,8 @@ def change_user_role(user_id: int, role: UserRoles) -> User:
     event = UserRoleChangedEventSchema(
         data={
             "public_id": user.public_id,
-            "old_role": old_role,
-            "new_role": role,
+            "old_role": old_role.value,
+            "new_role": role.value,
         }
     )
     producer = get_producer(EventTypes.BUSINESS_CALL)
@@ -104,7 +109,9 @@ def delete_user(user_id: int) -> User:
         except NoContextError:
             raise UserNotFound(f"User with id {user_id} not found")
 
-    event = UserDeletedEventSchema(data=asdict(user))
+    event = UserDeletedEventSchema(
+        data=asdict(user, dict_factory=dict_factory)
+    )
     producer = get_producer(EventTypes.DATA_STREAMING)
     producer.publish_message(
         event.json().encode("utf-8"),

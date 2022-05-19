@@ -1,10 +1,10 @@
-from constants import UserRoles
 from models import (
     Task,
     User,
 )
 from utils import get_public_id
 
+from popug_schema_registry.models.v1.task_created_event_schema import UserRoles
 from popug_sdk.db import create_session
 
 

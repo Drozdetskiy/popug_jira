@@ -1,9 +1,7 @@
 from dataclasses import asdict
+from datetime import datetime
 
-from constants import (
-    EventTypes,
-    TaskStatus,
-)
+from constants import EventTypes
 from dto.task import TaskDTO
 from events.task.producers import get_producer
 from events.utils import get_routing_key
@@ -14,17 +12,25 @@ from repos.task import (
     TasksListRepo,
 )
 from repos.user import UsersListRepo
-from schemas.events import (
-    TaskAssignedEventSchema,
-    TaskCompletedEventSchema,
-    TaskCreatedEventSchema,
-)
 from services.exception import (
     TaskNotFound,
     WrongTaskStatus,
 )
 from sqlalchemy.orm import Session
+from utils import dict_factory
 
+from popug_schema_registry.models.v1.task_assigned_event_schema import (
+    TaskAssignedEventSchema,
+)
+from popug_schema_registry.models.v1.task_completed_event_schema import (
+    TaskCompletedEventSchema,
+)
+from popug_schema_registry.models.v1.task_created_event_schema import (
+    TaskStatus,
+)
+from popug_schema_registry.models.v2.task_created_event_schema import (
+    TaskCreatedEventSchema,
+)
 from popug_sdk.db import create_session
 from popug_sdk.repos.base import NoContextError
 
@@ -55,7 +61,7 @@ def get_task(task_id: int) -> TaskDTO:
 
 
 def count_tasks(
-    assignee_id: int | None = None, session: Session = None
+    assignee_id: int | None = None, session: Session | None = None
 ) -> int:
     with create_session(session) as session:
         return TasksListRepo(session).count_all(assignee_id)
@@ -65,7 +71,7 @@ def add_task(data: BaseModel) -> TaskDTO:
     with create_session() as session:
         task_repo = TaskRepo(session).create_task(**data.dict())
         task = task_repo.get()
-        task_data = asdict(task)
+        task_data = asdict(task, dict_factory=dict_factory)
 
         old_assignee_public_id = task.assignee and task.assignee.public_id
 
@@ -73,7 +79,12 @@ def add_task(data: BaseModel) -> TaskDTO:
         task = task_repo.assign_to_user(user.id).apply()
         task_dto = task.to_dto()
 
-    event = TaskCreatedEventSchema(data=task_data)
+    task_data["title"] = task_data.pop("short_title")
+    event = TaskCreatedEventSchema(
+        data=task_data,
+        produced_at=datetime.utcnow(),
+        version=2,
+    )
     ds_producer = get_producer(EventTypes.DATA_STREAMING)
     ds_producer.publish_message(
         event.json().encode("utf-8"),
@@ -86,7 +97,8 @@ def add_task(data: BaseModel) -> TaskDTO:
             "public_id": task.public_id,
             "old_assignee_public_id": old_assignee_public_id,
             "new_assignee_public_id": user.public_id,
-        }
+        },
+        produced_at=datetime.utcnow(),
     )
     bc_producer.publish_message(
         event.json().encode("utf-8"),
@@ -109,7 +121,7 @@ def assign_task(task_id: int) -> TaskDTO:
                 f"Task {task_id} has wrong status {task.status}"
             )
 
-        old_assignee_public_id = task.assignee.public_id
+        old_assignee_public_id = task.assignee and task.assignee.public_id
         user, *_ = UsersListRepo(session).get_random_employees(lock=True).get()
         task = task_repo.assign_to_user(user.id).apply()
 
@@ -119,7 +131,8 @@ def assign_task(task_id: int) -> TaskDTO:
             "public_id": task.public_id,
             "old_assignee_public_id": old_assignee_public_id,
             "new_assignee_public_id": user.public_id,
-        }
+        },
+        produced_at=datetime.utcnow(),
     )
     producer.publish_message(
         event.json().encode("utf-8"),
@@ -158,9 +171,11 @@ def complete_task(task_id: int) -> TaskDTO:
     event = TaskCompletedEventSchema(
         data={
             "public_id": task.public_id,
-            "old_status": old_status,
-            "new_status": task.status,
-        }
+            "assignee_public_id": task.assignee and task.assignee.public_id,
+            "old_status": old_status.value,
+            "new_status": task.status.value,
+        },
+        produced_at=datetime.utcnow(),
     )
     producer.publish_message(
         event.json().encode("utf-8"),

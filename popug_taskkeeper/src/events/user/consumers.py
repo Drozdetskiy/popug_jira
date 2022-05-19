@@ -8,7 +8,9 @@ from popug_sdk.conf.amqp import AMQPSettings
 
 
 class UserEventsConsumer(BaseConsumer):
-    def __init__(self, config: AMQPSettings, callback: Callable) -> None:
+    def __init__(
+        self, config: AMQPSettings, callback: Callable[[Any], Any]
+    ) -> None:
         self._config = config
         self._callback = callback
         super().__init__(config)

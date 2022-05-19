@@ -23,6 +23,7 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
+  "jira_id": "{{$randomInt}}",
   "title": "{{$uuid}}",
   "description": "{{$uuid}}"
 }
@@ -41,6 +42,7 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
+  "jira_id": "{{$randomInt}}",
   "title": "{{$uuid}}",
   "description": "{{$uuid}}"
 }
@@ -51,6 +53,7 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
+  "jira_id": "{{$randomInt}}",
   "title": "{{$uuid}}",
   "description": "{{$uuid}}"
 }

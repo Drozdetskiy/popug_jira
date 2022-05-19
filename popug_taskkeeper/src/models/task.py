@@ -7,7 +7,6 @@ from dataclasses import (
 )
 from datetime import datetime
 
-from constants import TaskStatus
 from dto.task import TaskDTO
 from dto.user import UserDTO
 from models.user import User
@@ -25,6 +24,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from utils import get_public_id
 
+from popug_schema_registry.models.v1.task_created_event_schema import (
+    TaskStatus,
+)
 from popug_sdk.db import mapper_registry
 
 
@@ -42,7 +44,21 @@ class Task:
             default=get_public_id,
             nullable=False,
         ),
-        Column("title", String(50), nullable=False),
+        Column(
+            "title",
+            String(50),
+            nullable=False,
+            default="",
+            server_default=text("''"),
+        ),
+        Column(
+            "short_title",
+            String(50),
+            nullable=False,
+            default="",
+            server_default=text("''"),
+        ),
+        Column("jira_id", Integer),
         Column(
             "description",
             Text,
@@ -75,7 +91,9 @@ class Task:
         ),
     )
 
-    title: str
+    title: str = ""
+    short_title: str = ""
+    jira_id: int | None = None
     id: int = field(init=False)
     public_id: str = field(default_factory=get_public_id)
     description: str = ""
@@ -91,8 +109,21 @@ class Task:
 
     def to_dto(self) -> TaskDTO:
         data = asdict(self)
+
         assignee_data = data["assignee"]
         if assignee_data:
             data["assignee"] = UserDTO(**data["assignee"])
 
+        data["title"] = self.long_title
+        data.pop("short_title", None)
+        data.pop("jira_id", None)
+
         return TaskDTO(**data)
+
+    @property
+    def long_title(self) -> str:
+        return (
+            f"[{self.jira_id}]-{self.short_title})"
+            if self.jira_id
+            else self.title
+        )

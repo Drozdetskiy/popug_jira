@@ -1,5 +1,6 @@
-from constants import UserRoles
 from pydantic import BaseModel
+
+from popug_schema_registry.models.v1.task_created_event_schema import UserRoles
 
 
 class UserInfoSchema(BaseModel):

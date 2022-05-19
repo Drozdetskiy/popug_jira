@@ -3,14 +3,18 @@ import logging
 from functools import singledispatch
 
 from events.user.fabric import event_data_fabric
+from pydantic import BaseModel
 from repos.user import UserRepo
-from schemas.events import (
-    BaseEventSchema,
+
+from popug_schema_registry.models.v1.user_created_event_schema import (
     UserCreatedEventSchema,
+)
+from popug_schema_registry.models.v1.user_deleted_event_schema import (
     UserDeletedEventSchema,
+)
+from popug_schema_registry.models.v1.user_role_changed_event_schema import (
     UserRoleChangedEventSchema,
 )
-
 from popug_sdk.conf import settings
 from popug_sdk.db import create_session
 
@@ -18,7 +22,7 @@ logger = logging.getLogger(settings.project)
 
 
 @singledispatch
-def _process_event(event: BaseEventSchema) -> None:
+def _process_event(event: BaseModel) -> None:
     raise NotImplementedError
 
 
@@ -36,7 +40,7 @@ def _change_user_role(event: UserRoleChangedEventSchema) -> None:
         user = (
             UserRepo(session)
             .create_or_update(event.data.public_id, role=event.data.new_role)
-            .get()
+            .apply()
         )
         logger.info(f"{user = } role changed")
 
@@ -46,7 +50,7 @@ def _create_user(event: UserCreatedEventSchema) -> None:
     with create_session() as session:
         data = event.data.dict()
         public_id = data.pop("public_id")
-        user = UserRepo(session).create_or_update(public_id, **data).get()
+        user = UserRepo(session).create_or_update(public_id, **data).apply()
         logger.info(f"{user = } user created")
 
 

@@ -1,0 +1,90 @@
+{
+    "title": "UserCreatedEventSchema",
+    "type": "object",
+    "properties": {
+        "version": {
+            "title": "Version",
+            "default": 1,
+            "type": "integer"
+        },
+        "produced_at": {
+            "title": "Produced At",
+            "type": "string",
+            "format": "date-time"
+        },
+        "title": {
+            "default": "USER.CREATED",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/EventTitleUserCreated"
+                }
+            ]
+        },
+        "data": {
+            "$ref": "#/definitions/UserDataSchema"
+        },
+        "producer": {
+            "default": "POPUG_AUTH",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/UserProducer"
+                }
+            ]
+        }
+    },
+    "required": [
+        "data"
+    ],
+    "definitions": {
+        "EventTitleUserCreated": {
+            "title": "EventTitleUserCreated",
+            "description": "An enumeration.",
+            "enum": [
+                "USER.CREATED"
+            ]
+        },
+        "UserRoles": {
+            "title": "UserRoles",
+            "description": "An enumeration.",
+            "enum": [
+                "EMPLOYEE",
+                "ADMIN",
+                "MANAGER"
+            ]
+        },
+        "UserDataSchema": {
+            "title": "UserDataSchema",
+            "type": "object",
+            "properties": {
+                "public_id": {
+                    "title": "Public Id",
+                    "type": "string"
+                },
+                "username": {
+                    "title": "Username",
+                    "type": "string"
+                },
+                "email": {
+                    "title": "Email",
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/UserRoles"
+                }
+            },
+            "required": [
+                "public_id",
+                "username",
+                "email",
+                "role"
+            ]
+        },
+        "UserProducer": {
+            "title": "UserProducer",
+            "description": "An enumeration.",
+            "enum": [
+                "POPUG_AUTH"
+            ]
+        }
+    }
+}

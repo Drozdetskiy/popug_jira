@@ -1,0 +1,96 @@
+{
+    "title": "BillingCycleProcessedEventSchema",
+    "type": "object",
+    "properties": {
+        "version": {
+            "title": "Version",
+            "default": 1,
+            "type": "integer"
+        },
+        "produced_at": {
+            "title": "Produced At",
+            "type": "string",
+            "format": "date-time"
+        },
+        "title": {
+            "default": "BILLING_CYCLE.PROCESSED",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/EventTitleBillingCycleProcessed"
+                }
+            ]
+        },
+        "data": {
+            "$ref": "#/definitions/BillingCycleDataSchema"
+        },
+        "producer": {
+            "default": "POPUG_ACCOUNTING",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/AccountingProducer"
+                }
+            ]
+        }
+    },
+    "required": [
+        "data"
+    ],
+    "definitions": {
+        "EventTitleBillingCycleProcessed": {
+            "title": "EventTitleBillingCycleProcessed",
+            "description": "An enumeration.",
+            "enum": [
+                "BILLING_CYCLE.PROCESSED"
+            ]
+        },
+        "BillingCycleStatus": {
+            "title": "BillingCycleStatus",
+            "description": "An enumeration.",
+            "enum": [
+                "ACTIVE",
+                "CLOSED",
+                "PROCESSED"
+            ]
+        },
+        "BillingCycleDataSchema": {
+            "title": "BillingCycleDataSchema",
+            "type": "object",
+            "properties": {
+                "public_id": {
+                    "title": "Public Id",
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/BillingCycleStatus"
+                },
+                "started_at": {
+                    "title": "Started At",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "closed_at": {
+                    "title": "Closed At",
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "processed_at": {
+                    "title": "Processed At",
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "required": [
+                "public_id",
+                "status",
+                "started_at"
+            ]
+        },
+        "AccountingProducer": {
+            "title": "AccountingProducer",
+            "description": "An enumeration.",
+            "enum": [
+                "POPUG_ACCOUNTING"
+            ]
+        }
+    }
+}

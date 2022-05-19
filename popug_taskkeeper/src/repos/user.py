@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+import enum
 from typing import Any
 
-from constants import UserRoles
 from models import User
 from repos.exceptions import InvalidUserDataError
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import insert
 
+from popug_schema_registry.models.v1.task_created_event_schema import UserRoles
 from popug_sdk.repos.base import BaseRepo
 
 
@@ -32,7 +33,7 @@ class UserRepo(BaseRepo[User]):
 
         return self(query.filter(User.public_id == public_id).first())
 
-    def create_or_update(self, public_id: str, **data: Any) -> User:
+    def create_or_update(self, public_id: str, **data: Any) -> UserRepo:
         user = self.get_by_public_id(public_id, lock=True).context()
 
         if not user:
@@ -49,6 +50,13 @@ class UserRepo(BaseRepo[User]):
             for key, value in data.items():
                 if key in User.get_updatable_fields():
                     old_value = getattr(user, key)
+
+                    if isinstance(old_value, enum.Enum):
+                        old_value = old_value.value
+
+                    if isinstance(value, enum.Enum):
+                        value = value.value
+
                     if old_value != value:
                         setattr(user, key, value)
 
@@ -80,7 +88,7 @@ class UserRepo(BaseRepo[User]):
 
 class UsersListRepo(BaseRepo[list[User]]):
     def get_random_employees(
-        self, count: int = 1, lock=False, **lock_params: Any
+        self, count: int = 1, lock: bool = False, **lock_params: Any
     ) -> UsersListRepo:
         query = self._session.query(User)
 

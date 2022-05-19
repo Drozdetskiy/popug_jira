@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from constants import UserRoles
+from popug_schema_registry.models.v1.task_created_event_schema import UserRoles
 
 
 @dataclass

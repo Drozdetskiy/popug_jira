@@ -10,3 +10,4 @@ tmp
 tmp.py
 #.env
 .env.*
+celerybeat-schedule
