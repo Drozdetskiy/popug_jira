@@ -1,0 +1,96 @@
+{
+    "title": "TaskUpdatedEventSchema",
+    "type": "object",
+    "properties": {
+        "title": {
+            "default": "TASK.CREATED",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/EventTitleTaskCreated"
+                }
+            ]
+        },
+        "data": {
+            "$ref": "#/definitions/TaskDataUpdateSchema"
+        },
+        "producer": {
+            "default": "POPUG_TASKKEEPER",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/TaskProducer"
+                }
+            ]
+        }
+    },
+    "required": [
+        "data"
+    ],
+    "definitions": {
+        "EventTitleTaskCreated": {
+            "title": "EventTitleTaskCreated",
+            "description": "An enumeration.",
+            "enum": [
+                "TASK.CREATED"
+            ]
+        },
+        "TaskStatus": {
+            "title": "TaskStatus",
+            "description": "An enumeration.",
+            "enum": [
+                "OPEN",
+                "DONE"
+            ]
+        },
+        "UserInfoSchema": {
+            "title": "UserInfoSchema",
+            "type": "object",
+            "properties": {
+                "public_id": {
+                    "title": "Public Id",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "public_id"
+            ]
+        },
+        "TaskDataUpdateSchema": {
+            "title": "TaskDataUpdateSchema",
+            "type": "object",
+            "properties": {
+                "public_id": {
+                    "title": "Public Id",
+                    "type": "string"
+                },
+                "title": {
+                    "title": "Title",
+                    "type": "string"
+                },
+                "description": {
+                    "title": "Description",
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/TaskStatus"
+                },
+                "assignee": {
+                    "$ref": "#/definitions/UserInfoSchema"
+                },
+                "jira_id": {
+                    "title": "Jira Id",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "public_id"
+            ]
+        },
+        "TaskProducer": {
+            "title": "TaskProducer",
+            "description": "An enumeration.",
+            "enum": [
+                "POPUG_TASKKEEPER"
+            ]
+        }
+    }
+}
