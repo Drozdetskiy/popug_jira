@@ -68,7 +68,7 @@ def get_tasks(
         ),
     ],
 )
-def get_task(task_id: int):
+def get_task(task_id: int) -> dict[str, Any]:
     try:
         task = get_task_service(task_id)
     except TaskNotFound:

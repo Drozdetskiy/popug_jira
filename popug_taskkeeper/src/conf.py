@@ -65,25 +65,11 @@ class AMQPConfigSettings(BaseAMQPConfigSettings):
     )
 
 
-class UserEventsProducerSettings(BaseSettings):
-    sleep_time: int = 5
-
-
-class WorkersSettings(BaseSettings):
-    task_events_bc_producer_worker: UserEventsProducerSettings = Field(
-        default_factory=UserEventsProducerSettings
-    )
-    task_events_ds_producer_worker: UserEventsProducerSettings = Field(
-        default_factory=UserEventsProducerSettings
-    )
-
-
 class Settings(BaseSettings):
     project: str = PROGECT_NAME
     use_https = False
     database: DatabaseSettings = Field(default_factory=DatabaseSettings)
     amqp: AMQPConfigSettings = Field(default_factory=AMQPConfigSettings)
-    workers: WorkersSettings = Field(default_factory=WorkersSettings)
 
     class Config(BaseSettings.Config):
         env_prefix = f"{PROGECT_NAME.upper()}_"

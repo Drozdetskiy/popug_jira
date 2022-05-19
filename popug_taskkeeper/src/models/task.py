@@ -7,7 +7,6 @@ from dataclasses import (
 )
 from datetime import datetime
 
-from constants import TaskStatus
 from dto.task import TaskDTO
 from dto.user import UserDTO
 from models.user import User
@@ -25,6 +24,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from utils import get_public_id
 
+from popug_schema_registry.models.v1.task_created_event_schema import (
+    TaskStatus,
+)
 from popug_sdk.db import mapper_registry
 
 
