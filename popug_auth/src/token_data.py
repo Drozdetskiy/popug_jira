@@ -9,12 +9,12 @@ from datetime import (
 )
 
 import jwt
-from constants import UserRoles
 from utils import (
     dict_factory,
     get_scopes,
 )
 
+from popug_schema_registry.models.v1.task_created_event_schema import UserRoles
 from popug_sdk.conf import settings
 
 

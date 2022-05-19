@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from constants import UserRoles
 from models import User
 
+from popug_schema_registry.models.v1.task_created_event_schema import UserRoles
 from popug_sdk.repos.base import BaseRepo
 
 

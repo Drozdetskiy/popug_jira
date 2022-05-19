@@ -1,6 +1,5 @@
 from typing import Any
 
-from constants import UserRoles
 from fastapi import (
     APIRouter,
     Depends,
@@ -28,6 +27,7 @@ from services.users import (
 from starlette import status
 from utils import get_scopes
 
+from popug_schema_registry.models.v1.task_created_event_schema import UserRoles
 from popug_sdk.auth.dependencies.permissions import check_permissions
 from popug_sdk.dependencies.pagination import PagePagination
 from popug_sdk.response.response import get_response_data
