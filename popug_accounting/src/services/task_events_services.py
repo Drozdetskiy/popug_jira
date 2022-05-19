@@ -20,10 +20,13 @@ from popug_schema_registry.models.v1.task_completed_event_schema import (
     TaskCompletedEventSchema,
 )
 from popug_schema_registry.models.v1.task_created_event_schema import (
-    TaskCreatedEventSchema,
+    TaskCreatedEventSchema as TaskCreatedEventSchemaV1,
 )
 from popug_schema_registry.models.v1.transaction_added_event_schema import (
     TransactionTypes,
+)
+from popug_schema_registry.models.v2.task_created_event_schema import (
+    TaskCreatedEventSchema as TaskCreatedEventSchemaV2,
 )
 from popug_sdk.conf import settings
 from popug_sdk.db import create_session
@@ -122,12 +125,34 @@ def _assign_task(event: TaskAssignedEventSchema) -> None:
 
 
 @_process_event.register
-def _create_task(event: TaskCreatedEventSchema) -> None:
+def _create_task_v1(event: TaskCreatedEventSchemaV1) -> None:
     taskcost_added = False
 
     with create_session() as session:
         data = event.data.dict()
         public_id = data.pop("public_id")
+        task = TaskRepo(session).create_or_update(public_id, **data).get()
+        taskcost_repo = TaskCostRepo(session)
+        taskcost = taskcost_repo.get_by_task_id(task.id).context()
+
+        if not taskcost:
+            taskcost = taskcost_repo.add(task.id).apply()
+            taskcost_added = True
+
+        logger.info(f"{task = } created with {taskcost = }.")
+
+    if taskcost_added:
+        send_taskcost_added_event(taskcost, task)
+
+
+@_process_event.register
+def _create_task_v2(event: TaskCreatedEventSchemaV2) -> None:
+    taskcost_added = False
+
+    with create_session() as session:
+        data = event.data.dict()
+        public_id = data.pop("public_id")
+        data["short_title"] = data.pop("title")
         task = TaskRepo(session).create_or_update(public_id, **data).get()
         taskcost_repo = TaskCostRepo(session)
         taskcost = taskcost_repo.get_by_task_id(task.id).context()

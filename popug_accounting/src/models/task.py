@@ -33,6 +33,14 @@ class Task:
             server_default=text("''"),
         ),
         Column(
+            "short_title",
+            String(50),
+            nullable=False,
+            default="",
+            server_default=text("''"),
+        ),
+        Column("jira_id", Integer),
+        Column(
             "description",
             Text,
             nullable=False,
@@ -43,9 +51,19 @@ class Task:
 
     public_id: str
     title: str = ""
+    short_title: str = ""
     id: int = field(init=False)
     description: str = ""
+    jira_id: int = None
 
     @classmethod
     def get_updatable_fields(cls) -> list[str]:
         return ["title", "description"]
+
+    @property
+    def long_title(self) -> str:
+        return (
+            f"[{self.jira_id}]-{self.short_title})"
+            if self.jira_id
+            else self.title
+        )

@@ -17,9 +17,11 @@ class TaskSchema(BaseModel):
     created_at: datetime
     updated_at: datetime
     assignee: UserInfoSchema | None
+    jira_id: int | None
 
 
 class NewTaskSchema(BaseModel):
+    jira_id: int
     title: str
     description: str
 

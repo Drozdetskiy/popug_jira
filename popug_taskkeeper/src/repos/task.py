@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import enum
 from typing import Any
 
 from models import (
@@ -38,6 +39,26 @@ class TaskRepo(BaseRepo[Task]):
         task = self.get()
 
         task.status = TaskStatus.DONE
+        self._session.add(task)
+
+        return self(task)
+
+    def update(self, **data: Any) -> TaskRepo:
+        task = self.get()
+
+        for key, value in data.items():
+            if key in User.get_updatable_fields():
+                old_value = getattr(task, key)
+
+                if isinstance(old_value, enum.Enum):
+                    old_value = old_value.value
+
+                if isinstance(value, enum.Enum):
+                    value = value.value
+
+                if old_value != value:
+                    setattr(task, key, value)
+
         self._session.add(task)
 
         return self(task)
